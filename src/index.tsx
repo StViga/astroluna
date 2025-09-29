@@ -18,12 +18,14 @@ app.use(renderer)
 
 // Import payment routes
 import paymentRoutes from './routes/payments'
+import aiServicesRoutes from './routes/ai-services'
 import { CheckoutPage } from './components/checkout'
 
 // API routes
 app.route('/api/auth', authRoutes)
 app.route('/api/currency', currencyRoutes)
 app.route('/api/payments', paymentRoutes)
+app.route('/api/ai', aiServicesRoutes)
 
 // Health check endpoint
 app.get('/api/health', (c) => {
@@ -121,16 +123,16 @@ app.get('/', (c) => {
               AI-powered astrology oracle that combines the wisdom of stars and Tarot cards to reveal your personalized cosmic insights
             </p>
             <div className="flex flex-col md:flex-row gap-4 justify-center">
-              <button className="bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-4 rounded-lg text-lg font-semibold hover:glow transition-all">
+              <a href="/tarotpath" className="bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-4 rounded-lg text-lg font-semibold hover:glow transition-all inline-block text-center">
                 <i className="fas fa-cards-blank mr-2"></i>
                 Get Tarot Reading
-              </button>
-              <button className="bg-gradient-to-r from-blue-600 to-cyan-600 px-8 py-4 rounded-lg text-lg font-semibold hover:glow transition-all">
+              </a>
+              <a href="/astroscope" className="bg-gradient-to-r from-blue-600 to-cyan-600 px-8 py-4 rounded-lg text-lg font-semibold hover:glow transition-all inline-block text-center">
                 <i className="fas fa-moon mr-2"></i>
                 Generate Horoscope
-              </button>
+              </a>
             </div>
-            <a href="#learn" className="inline-block mt-6 text-purple-400 hover:text-purple-300 underline">
+            <a href="/zodiac" className="inline-block mt-6 text-purple-400 hover:text-purple-300 underline">
               Learn about zodiac signs
             </a>
           </div>
@@ -152,9 +154,9 @@ app.get('/', (c) => {
                 <p className="text-gray-400 mb-6">
                   Personalized monthly horoscopes with key events and favorable dates based on your birth data
                 </p>
-                <button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 py-3 rounded-lg font-semibold hover:glow transition-all">
+                <a href="/astroscope" className="w-full bg-gradient-to-r from-purple-600 to-blue-600 py-3 rounded-lg font-semibold hover:glow transition-all inline-block text-center">
                   Get Started
-                </button>
+                </a>
               </div>
 
               {/* TarotPath */}
@@ -166,9 +168,9 @@ app.get('/', (c) => {
                 <p className="text-gray-400 mb-6">
                   AI-generated Tarot card spreads that reveal your lunar path with interactive virtual deck
                 </p>
-                <button className="w-full bg-gradient-to-r from-pink-600 to-purple-600 py-3 rounded-lg font-semibold hover:glow transition-all">
+                <a href="/tarotpath" className="w-full bg-gradient-to-r from-pink-600 to-purple-600 py-3 rounded-lg font-semibold hover:glow transition-all inline-block text-center">
                   Get Started
-                </button>
+                </a>
               </div>
 
               {/* ZodiacTome */}
@@ -180,9 +182,9 @@ app.get('/', (c) => {
                 <p className="text-gray-400 mb-6">
                   Comprehensive zodiac knowledge base with compatibility analysis and AI-powered insights
                 </p>
-                <button className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 py-3 rounded-lg font-semibold hover:glow transition-all">
+                <a href="/zodiac" className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 py-3 rounded-lg font-semibold hover:glow transition-all inline-block text-center">
                   Get Started
-                </button>
+                </a>
               </div>
             </div>
           </div>
@@ -340,6 +342,1403 @@ app.get('/checkout/cancel', (c) => {
             </a>
           </div>
         </div>
+      </body>
+    </html>
+  )
+})
+
+// AstroScope service page
+app.get('/astroscope', (c) => {
+  return c.render(
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>AstroScope - AI Horoscope Generator</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+        <style>{`
+          body { 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+          }
+          .glow { 
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+          }
+        `}</style>
+      </head>
+      <body className="text-white">
+        {/* Navigation */}
+        <nav className="fixed top-0 w-full z-50 bg-black/20 backdrop-blur-md border-b border-purple-500/20">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-8">
+                <a href="/" className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
+                  AstroLuna
+                </a>
+                <div className="hidden md:flex space-x-6">
+                  <a href="/astroscope" className="text-purple-400 font-semibold">AstroScope</a>
+                  <a href="/tarotpath" className="text-gray-300 hover:text-purple-400 transition-colors">TarotPath</a>
+                  <a href="/zodiac" className="text-gray-300 hover:text-purple-400 transition-colors">ZodiacTome</a>
+                  <a href="/dashboard" className="text-gray-300 hover:text-purple-400 transition-colors">Dashboard</a>
+                </div>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div id="credits-display" className="bg-gray-800/50 px-3 py-1 rounded text-sm">
+                  <i className="fas fa-coins text-yellow-400 mr-1"></i>
+                  <span id="credits">0</span> credits
+                </div>
+                <div id="auth-buttons">
+                  <a href="/login" className="bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg hover:glow transition-all inline-block">
+                    Login
+                  </a>
+                </div>
+                <div id="user-menu" className="hidden">
+                  <button id="logout-btn" className="text-gray-300 hover:text-white">
+                    <i className="fas fa-sign-out-alt mr-1"></i> Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        {/* Main Content */}
+        <div className="pt-24 min-h-screen">
+          <div className="max-w-4xl mx-auto px-6 py-8">
+            <div className="text-center mb-12">
+              <h1 className="text-5xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
+                <i className="fas fa-moon mr-3"></i>AstroScope
+              </h1>
+              <p className="text-xl text-gray-300">
+                Get personalized AI-generated horoscopes based on your birth data and current celestial positions
+              </p>
+            </div>
+
+            {/* Service Options */}
+            <div className="grid md:grid-cols-2 gap-8 mb-12">
+              {/* Personalized Horoscope */}
+              <div className="bg-gray-800/30 backdrop-blur-sm border border-purple-500/30 rounded-xl p-8">
+                <div className="text-center mb-6">
+                  <div className="text-4xl text-purple-400 mb-4">
+                    <i className="fas fa-user-astronaut"></i>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">Personalized Reading</h3>
+                  <p className="text-gray-400 mb-4">
+                    Complete horoscope with birth chart analysis, favorable dates, and key cosmic events
+                  </p>
+                  <div className="text-yellow-400 font-semibold mb-4">
+                    <i className="fas fa-coins mr-2"></i>15 credits
+                  </div>
+                </div>
+                
+                <form id="personalizedForm" className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-gray-300 mb-2">Birth Date</label>
+                      <input type="date" name="birth_date" required 
+                        className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-purple-500 focus:outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-gray-300 mb-2">Birth Time</label>
+                      <input type="time" name="birth_time" required 
+                        className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-purple-500 focus:outline-none" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-gray-300 mb-2">Birth Location</label>
+                    <input type="text" name="birth_location" required placeholder="City, Country"
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-purple-500 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-gray-300 mb-2">Reading Period</label>
+                    <select name="period" required 
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-purple-500 focus:outline-none">
+                      <option value="daily">Daily (Today)</option>
+                      <option value="weekly">Weekly (7 days)</option>
+                      <option value="monthly" selected>Monthly (30 days)</option>
+                    </select>
+                  </div>
+                  <button type="submit" 
+                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 py-3 rounded-lg font-semibold hover:glow transition-all">
+                    Generate Personalized Horoscope
+                  </button>
+                </form>
+              </div>
+
+              {/* Quick Horoscope */}
+              <div className="bg-gray-800/30 backdrop-blur-sm border border-blue-500/30 rounded-xl p-8">
+                <div className="text-center mb-6">
+                  <div className="text-4xl text-blue-400 mb-4">
+                    <i className="fas fa-rocket"></i>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">Quick Reading</h3>
+                  <p className="text-gray-400 mb-4">
+                    Fast horoscope based on your zodiac sign and current planetary positions
+                  </p>
+                  <div className="text-yellow-400 font-semibold mb-4">
+                    <i className="fas fa-coins mr-2"></i>15 credits
+                  </div>
+                </div>
+                
+                <form id="quickForm" className="space-y-4">
+                  <div>
+                    <label className="block text-gray-300 mb-2">Zodiac Sign</label>
+                    <select name="zodiac_sign" required 
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-purple-500 focus:outline-none">
+                      <option value="">Select your sign</option>
+                      <option value="aries">♈ Aries (Mar 21 - Apr 19)</option>
+                      <option value="taurus">♉ Taurus (Apr 20 - May 20)</option>
+                      <option value="gemini">♊ Gemini (May 21 - Jun 20)</option>
+                      <option value="cancer">♋ Cancer (Jun 21 - Jul 22)</option>
+                      <option value="leo">♌ Leo (Jul 23 - Aug 22)</option>
+                      <option value="virgo">♍ Virgo (Aug 23 - Sep 22)</option>
+                      <option value="libra">♎ Libra (Sep 23 - Oct 22)</option>
+                      <option value="scorpio">♏ Scorpio (Oct 23 - Nov 21)</option>
+                      <option value="sagittarius">♐ Sagittarius (Nov 22 - Dec 21)</option>
+                      <option value="capricorn">♑ Capricorn (Dec 22 - Jan 19)</option>
+                      <option value="aquarius">♒ Aquarius (Jan 20 - Feb 18)</option>
+                      <option value="pisces">♓ Pisces (Feb 19 - Mar 20)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-gray-300 mb-2">Reading Period</label>
+                    <select name="period" required 
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-purple-500 focus:outline-none">
+                      <option value="daily">Daily (Today)</option>
+                      <option value="weekly">Weekly (7 days)</option>
+                      <option value="monthly" selected>Monthly (30 days)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-gray-300 mb-2">Focus Areas (Optional)</label>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <label className="flex items-center space-x-2">
+                        <input type="checkbox" name="focus" value="love" className="rounded text-purple-600" />
+                        <span>Love & Relationships</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input type="checkbox" name="focus" value="career" className="rounded text-purple-600" />
+                        <span>Career & Finance</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input type="checkbox" name="focus" value="health" className="rounded text-purple-600" />
+                        <span>Health & Wellness</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input type="checkbox" name="focus" value="spiritual" className="rounded text-purple-600" />
+                        <span>Spiritual Growth</span>
+                      </label>
+                    </div>
+                  </div>
+                  <button type="submit" 
+                    className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 py-3 rounded-lg font-semibold hover:glow transition-all">
+                    Generate Quick Horoscope
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {/* Results Section */}
+            <div id="results" className="hidden">
+              <div className="bg-gray-800/30 backdrop-blur-sm border border-green-500/30 rounded-xl p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold text-green-400">
+                    <i className="fas fa-magic mr-2"></i>Your Horoscope
+                  </h3>
+                  <button id="saveReading" className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
+                    <i className="fas fa-save mr-2"></i>Save to Library
+                  </button>
+                </div>
+                <div id="horoscopeContent" className="prose prose-invert max-w-none">
+                  {/* Generated content will appear here */}
+                </div>
+              </div>
+            </div>
+
+            {/* Loading State */}
+            <div id="loading" className="hidden text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mb-4"></div>
+              <p className="text-gray-300">The stars are aligning your cosmic reading...</p>
+            </div>
+          </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+        <script>{`
+          document.addEventListener('DOMContentLoaded', function() {
+            loadUserProfile();
+            
+            // Setup form handlers
+            document.getElementById('personalizedForm').addEventListener('submit', handlePersonalizedForm);
+            document.getElementById('quickForm').addEventListener('submit', handleQuickForm);
+          });
+          
+          async function loadUserProfile() {
+            try {
+              const token = localStorage.getItem('auth_token');
+              if (!token) {
+                document.getElementById('auth-buttons').classList.remove('hidden');
+                return;
+              }
+              
+              const response = await axios.get('/api/auth/profile', {
+                headers: { Authorization: \`Bearer \${token}\` }
+              });
+              
+              if (response.data.success) {
+                document.getElementById('credits').textContent = response.data.credits;
+                document.getElementById('auth-buttons').classList.add('hidden');
+                document.getElementById('user-menu').classList.remove('hidden');
+                
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                  localStorage.removeItem('auth_token');
+                  window.location.href = '/';
+                });
+              }
+            } catch (error) {
+              console.error('Failed to load profile:', error);
+              document.getElementById('auth-buttons').classList.remove('hidden');
+            }
+          }
+          
+          async function handlePersonalizedForm(e) {
+            e.preventDefault();
+            
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+              alert('Please login to generate horoscopes');
+              window.location.href = '/login';
+              return;
+            }
+            
+            const formData = new FormData(e.target);
+            const data = {
+              type: 'personalized',
+              birth_date: formData.get('birth_date'),
+              birth_time: formData.get('birth_time'),
+              birth_location: formData.get('birth_location'),
+              period: formData.get('period')
+            };
+            
+            await generateHoroscope(data, token);
+          }
+          
+          async function handleQuickForm(e) {
+            e.preventDefault();
+            
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+              alert('Please login to generate horoscopes');
+              window.location.href = '/login';
+              return;
+            }
+            
+            const formData = new FormData(e.target);
+            const focusAreas = Array.from(formData.getAll('focus'));
+            
+            const data = {
+              type: 'quick',
+              zodiac_sign: formData.get('zodiac_sign'),
+              period: formData.get('period'),
+              focus_areas: focusAreas
+            };
+            
+            await generateHoroscope(data, token);
+          }
+          
+          async function generateHoroscope(data, token) {
+            try {
+              document.getElementById('loading').classList.remove('hidden');
+              document.getElementById('results').classList.add('hidden');
+              
+              const response = await axios.post('/api/ai/astroscope/generate', data, {
+                headers: { 
+                  Authorization: \`Bearer \${token}\`,
+                  'Content-Type': 'application/json'
+                }
+              });
+              
+              if (response.data.success) {
+                document.getElementById('horoscopeContent').innerHTML = 
+                  '<div class="whitespace-pre-wrap text-gray-100">' + response.data.content + '</div>';
+                document.getElementById('results').classList.remove('hidden');
+                
+                // Update credits display
+                const creditsElement = document.getElementById('credits');
+                const currentCredits = parseInt(creditsElement.textContent);
+                creditsElement.textContent = currentCredits - 15;
+                
+                // Setup save button
+                document.getElementById('saveReading').onclick = () => saveToLibrary(response.data.reading_id);
+              } else {
+                alert(response.data.error || 'Failed to generate horoscope');
+              }
+            } catch (error) {
+              console.error('Generation error:', error);
+              alert(error.response?.data?.error || 'Failed to generate horoscope');
+            } finally {
+              document.getElementById('loading').classList.add('hidden');
+            }
+          }
+          
+          async function saveToLibrary(readingId) {
+            try {
+              const token = localStorage.getItem('auth_token');
+              const response = await axios.post('/api/ai/save-reading', 
+                { reading_id: readingId },
+                { headers: { Authorization: \`Bearer \${token}\` } }
+              );
+              
+              if (response.data.success) {
+                alert('Reading saved to your library!');
+                document.getElementById('saveReading').innerHTML = 
+                  '<i class="fas fa-check mr-2"></i>Saved';
+                document.getElementById('saveReading').disabled = true;
+              }
+            } catch (error) {
+              console.error('Save error:', error);
+              alert('Failed to save reading');
+            }
+          }
+        `}</script>
+      </body>
+    </html>
+  )
+})
+
+// TarotPath service page
+app.get('/tarotpath', (c) => {
+  return c.render(
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>TarotPath - AI Tarot Card Readings</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+        <style>{`
+          body { 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+          }
+          .glow { 
+            box-shadow: 0 0 20px rgba(219, 39, 119, 0.5);
+          }
+          .tarot-card {
+            background: linear-gradient(145deg, #2a2a40, #1a1a30);
+            border: 2px solid rgba(219, 39, 119, 0.3);
+            transition: all 0.3s ease;
+          }
+          .tarot-card:hover {
+            border-color: rgba(219, 39, 119, 0.6);
+            transform: translateY(-5px);
+          }
+        `}</style>
+      </head>
+      <body className="text-white">
+        {/* Navigation */}
+        <nav className="fixed top-0 w-full z-50 bg-black/20 backdrop-blur-md border-b border-purple-500/20">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-8">
+                <a href="/" className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
+                  AstroLuna
+                </a>
+                <div className="hidden md:flex space-x-6">
+                  <a href="/astroscope" className="text-gray-300 hover:text-purple-400 transition-colors">AstroScope</a>
+                  <a href="/tarotpath" className="text-pink-400 font-semibold">TarotPath</a>
+                  <a href="/zodiac" className="text-gray-300 hover:text-purple-400 transition-colors">ZodiacTome</a>
+                  <a href="/dashboard" className="text-gray-300 hover:text-purple-400 transition-colors">Dashboard</a>
+                </div>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div id="credits-display" className="bg-gray-800/50 px-3 py-1 rounded text-sm">
+                  <i className="fas fa-coins text-yellow-400 mr-1"></i>
+                  <span id="credits">0</span> credits
+                </div>
+                <div id="auth-buttons">
+                  <a href="/login" className="bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg hover:glow transition-all inline-block">
+                    Login
+                  </a>
+                </div>
+                <div id="user-menu" className="hidden">
+                  <button id="logout-btn" className="text-gray-300 hover:text-white">
+                    <i className="fas fa-sign-out-alt mr-1"></i> Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        {/* Main Content */}
+        <div className="pt-24 min-h-screen">
+          <div className="max-w-6xl mx-auto px-6 py-8">
+            <div className="text-center mb-12">
+              <h1 className="text-5xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">
+                <i className="fas fa-cards-blank mr-3"></i>TarotPath
+              </h1>
+              <p className="text-xl text-gray-300">
+                Discover your lunar path through AI-generated Tarot card spreads and intuitive guidance
+              </p>
+            </div>
+
+            {/* Tarot Reading Setup */}
+            <div className="bg-gray-800/30 backdrop-blur-sm border border-pink-500/30 rounded-xl p-8 mb-8">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold mb-2">5-Card Lunar Path Reading</h3>
+                <p className="text-gray-400 mb-4">
+                  Explore your past, present, future, and the cosmic forces guiding your journey
+                </p>
+                <div className="text-yellow-400 font-semibold mb-6">
+                  <i className="fas fa-coins mr-2"></i>20 credits
+                </div>
+              </div>
+              
+              <form id="tarotForm" className="max-w-lg mx-auto space-y-6">
+                <div>
+                  <label className="block text-gray-300 mb-2">Your Question or Focus Area</label>
+                  <textarea name="question" rows="3" required placeholder="What guidance do you seek from the cards?"
+                    className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-pink-500 focus:outline-none resize-none"></textarea>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-gray-300 mb-2">Reading Type</label>
+                    <select name="reading_type" required 
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-pink-500 focus:outline-none">
+                      <option value="general">General Guidance</option>
+                      <option value="love">Love & Relationships</option>
+                      <option value="career">Career & Goals</option>
+                      <option value="spiritual">Spiritual Path</option>
+                      <option value="decision">Decision Making</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-gray-300 mb-2">Spread Layout</label>
+                    <select name="spread_type" required 
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-pink-500 focus:outline-none">
+                      <option value="lunar_path">Lunar Path (5 cards)</option>
+                      <option value="celtic_cross">Celtic Cross (5 cards)</option>
+                      <option value="chakra_flow">Chakra Flow (5 cards)</option>
+                      <option value="elements">Four Elements (5 cards)</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="text-center">
+                  <button type="submit" 
+                    className="bg-gradient-to-r from-pink-600 to-purple-600 px-8 py-4 rounded-lg font-semibold text-lg hover:glow transition-all">
+                    <i className="fas fa-magic mr-2"></i>Draw Your Cards
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Virtual Card Animation */}
+            <div id="cardSelection" className="hidden mb-8">
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold text-pink-400 mb-2">Choose Your Cards</h3>
+                <p className="text-gray-400">Focus on your question and select 5 cards from the deck</p>
+              </div>
+              
+              <div className="flex flex-wrap justify-center gap-2 mb-6" id="cardDeck">
+                {/* Virtual cards will be generated here */}
+              </div>
+              
+              <div className="text-center">
+                <div id="selectedCards" className="flex justify-center gap-4 mb-4 min-h-[120px]">
+                  {/* Selected cards will appear here */}
+                </div>
+                <button id="revealCards" className="hidden bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 rounded-lg font-semibold hover:glow transition-all">
+                  <i className="fas fa-eye mr-2"></i>Reveal Your Reading
+                </button>
+              </div>
+            </div>
+
+            {/* Results Section */}
+            <div id="results" className="hidden">
+              <div className="bg-gray-800/30 backdrop-blur-sm border border-green-500/30 rounded-xl p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold text-green-400">
+                    <i className="fas fa-magic mr-2"></i>Your Tarot Reading
+                  </h3>
+                  <button id="saveReading" className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
+                    <i className="fas fa-save mr-2"></i>Save to Library
+                  </button>
+                </div>
+                <div id="readingContent" className="prose prose-invert max-w-none">
+                  {/* Generated content will appear here */}
+                </div>
+              </div>
+            </div>
+
+            {/* Loading State */}
+            <div id="loading" className="hidden text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-pink-400 mb-4"></div>
+              <p className="text-gray-300">The cards are revealing their wisdom...</p>
+            </div>
+          </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+        <script>{`
+          let selectedCardIds = [];
+          let readingData = {};
+          
+          document.addEventListener('DOMContentLoaded', function() {
+            loadUserProfile();
+            document.getElementById('tarotForm').addEventListener('submit', handleTarotForm);
+          });
+          
+          async function loadUserProfile() {
+            try {
+              const token = localStorage.getItem('auth_token');
+              if (!token) {
+                document.getElementById('auth-buttons').classList.remove('hidden');
+                return;
+              }
+              
+              const response = await axios.get('/api/auth/profile', {
+                headers: { Authorization: \`Bearer \${token}\` }
+              });
+              
+              if (response.data.success) {
+                document.getElementById('credits').textContent = response.data.credits;
+                document.getElementById('auth-buttons').classList.add('hidden');
+                document.getElementById('user-menu').classList.remove('hidden');
+                
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                  localStorage.removeItem('auth_token');
+                  window.location.href = '/';
+                });
+              }
+            } catch (error) {
+              console.error('Failed to load profile:', error);
+              document.getElementById('auth-buttons').classList.remove('hidden');
+            }
+          }
+          
+          function handleTarotForm(e) {
+            e.preventDefault();
+            
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+              alert('Please login to get tarot readings');
+              window.location.href = '/login';
+              return;
+            }
+            
+            const formData = new FormData(e.target);
+            readingData = {
+              question: formData.get('question'),
+              reading_type: formData.get('reading_type'),
+              spread_type: formData.get('spread_type')
+            };
+            
+            // Hide form and show card selection
+            e.target.style.display = 'none';
+            document.getElementById('cardSelection').classList.remove('hidden');
+            
+            generateVirtualDeck();
+          }
+          
+          function generateVirtualDeck() {
+            const cardDeck = document.getElementById('cardDeck');
+            cardDeck.innerHTML = '';
+            
+            // Create 78 virtual tarot cards
+            for (let i = 1; i <= 78; i++) {
+              const card = document.createElement('div');
+              card.className = 'tarot-card w-12 h-20 rounded-lg flex items-center justify-center cursor-pointer text-xs font-bold';
+              card.textContent = i;
+              card.dataset.cardId = i;
+              
+              card.addEventListener('click', () => selectCard(card, i));
+              cardDeck.appendChild(card);
+            }
+          }
+          
+          function selectCard(cardElement, cardId) {
+            if (selectedCardIds.includes(cardId) || selectedCardIds.length >= 5) return;
+            
+            selectedCardIds.push(cardId);
+            cardElement.style.opacity = '0.3';
+            cardElement.style.pointerEvents = 'none';
+            
+            // Add to selected cards display
+            const selectedCards = document.getElementById('selectedCards');
+            const selectedCard = document.createElement('div');
+            selectedCard.className = 'tarot-card w-16 h-24 rounded-lg flex items-center justify-center font-bold bg-pink-600/20';
+            selectedCard.textContent = cardId;
+            selectedCards.appendChild(selectedCard);
+            
+            if (selectedCardIds.length === 5) {
+              document.getElementById('revealCards').classList.remove('hidden');
+              document.getElementById('revealCards').addEventListener('click', generateReading);
+            }
+          }
+          
+          async function generateReading() {
+            try {
+              const token = localStorage.getItem('auth_token');
+              document.getElementById('loading').classList.remove('hidden');
+              document.getElementById('cardSelection').style.display = 'none';
+              
+              const requestData = {
+                ...readingData,
+                selected_cards: selectedCardIds
+              };
+              
+              const response = await axios.post('/api/ai/tarotpath/generate', requestData, {
+                headers: { 
+                  Authorization: \`Bearer \${token}\`,
+                  'Content-Type': 'application/json'
+                }
+              });
+              
+              if (response.data.success) {
+                document.getElementById('readingContent').innerHTML = 
+                  '<div class="whitespace-pre-wrap text-gray-100">' + response.data.content + '</div>';
+                document.getElementById('results').classList.remove('hidden');
+                
+                // Update credits display
+                const creditsElement = document.getElementById('credits');
+                const currentCredits = parseInt(creditsElement.textContent);
+                creditsElement.textContent = currentCredits - 20;
+                
+                // Setup save button
+                document.getElementById('saveReading').onclick = () => saveToLibrary(response.data.reading_id);
+              } else {
+                alert(response.data.error || 'Failed to generate tarot reading');
+              }
+            } catch (error) {
+              console.error('Generation error:', error);
+              alert(error.response?.data?.error || 'Failed to generate tarot reading');
+            } finally {
+              document.getElementById('loading').classList.add('hidden');
+            }
+          }
+          
+          async function saveToLibrary(readingId) {
+            try {
+              const token = localStorage.getItem('auth_token');
+              const response = await axios.post('/api/ai/save-reading', 
+                { reading_id: readingId },
+                { headers: { Authorization: \`Bearer \${token}\` } }
+              );
+              
+              if (response.data.success) {
+                alert('Reading saved to your library!');
+                document.getElementById('saveReading').innerHTML = 
+                  '<i class="fas fa-check mr-2"></i>Saved';
+                document.getElementById('saveReading').disabled = true;
+              }
+            } catch (error) {
+              console.error('Save error:', error);
+              alert('Failed to save reading');
+            }
+          }
+        `}</script>
+      </body>
+    </html>
+  )
+})
+
+// ZodiacTome service page  
+app.get('/zodiac', (c) => {
+  return c.render(
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>ZodiacTome - Zodiac Compatibility & Insights</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+        <style>{`
+          body { 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+          }
+          .glow { 
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
+          }
+          .zodiac-sign {
+            background: linear-gradient(145deg, #2a2a40, #1a1a30);
+            border: 2px solid rgba(6, 182, 212, 0.3);
+            transition: all 0.3s ease;
+          }
+          .zodiac-sign:hover {
+            border-color: rgba(6, 182, 212, 0.6);
+            transform: translateY(-2px);
+          }
+          .zodiac-sign.selected {
+            border-color: #06b6d4;
+            background: rgba(6, 182, 212, 0.1);
+          }
+        `}</style>
+      </head>
+      <body className="text-white">
+        {/* Navigation */}
+        <nav className="fixed top-0 w-full z-50 bg-black/20 backdrop-blur-md border-b border-purple-500/20">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-8">
+                <a href="/" className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
+                  AstroLuna
+                </a>
+                <div className="hidden md:flex space-x-6">
+                  <a href="/astroscope" className="text-gray-300 hover:text-purple-400 transition-colors">AstroScope</a>
+                  <a href="/tarotpath" className="text-gray-300 hover:text-purple-400 transition-colors">TarotPath</a>
+                  <a href="/zodiac" className="text-cyan-400 font-semibold">ZodiacTome</a>
+                  <a href="/dashboard" className="text-gray-300 hover:text-purple-400 transition-colors">Dashboard</a>
+                </div>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div id="credits-display" className="bg-gray-800/50 px-3 py-1 rounded text-sm">
+                  <i className="fas fa-coins text-yellow-400 mr-1"></i>
+                  <span id="credits">0</span> credits
+                </div>
+                <div id="auth-buttons">
+                  <a href="/login" className="bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg hover:glow transition-all inline-block">
+                    Login
+                  </a>
+                </div>
+                <div id="user-menu" className="hidden">
+                  <button id="logout-btn" className="text-gray-300 hover:text-white">
+                    <i className="fas fa-sign-out-alt mr-1"></i> Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        {/* Main Content */}
+        <div className="pt-24 min-h-screen">
+          <div className="max-w-6xl mx-auto px-6 py-8">
+            <div className="text-center mb-12">
+              <h1 className="text-5xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">
+                <i className="fas fa-star-of-david mr-3"></i>ZodiacTome
+              </h1>
+              <p className="text-xl text-gray-300">
+                Comprehensive zodiac knowledge base with AI-powered compatibility analysis and cosmic insights
+              </p>
+            </div>
+
+            {/* Service Options */}
+            <div className="grid lg:grid-cols-2 gap-8 mb-12">
+              {/* Compatibility Analysis */}
+              <div className="bg-gray-800/30 backdrop-blur-sm border border-cyan-500/30 rounded-xl p-8">
+                <div className="text-center mb-6">
+                  <div className="text-4xl text-cyan-400 mb-4">
+                    <i className="fas fa-heart"></i>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">Compatibility Analysis</h3>
+                  <p className="text-gray-400 mb-4">
+                    Discover cosmic compatibility between two zodiac signs with detailed insights
+                  </p>
+                  <div className="text-yellow-400 font-semibold mb-4">
+                    <i className="fas fa-coins mr-2"></i>10 credits
+                  </div>
+                </div>
+                
+                <form id="compatibilityForm" className="space-y-6">
+                  <div>
+                    <label className="block text-gray-300 mb-3 text-center">Select First Sign</label>
+                    <div className="grid grid-cols-4 gap-2" id="firstSignGrid">
+                      <div className="zodiac-sign p-3 rounded-lg cursor-pointer text-center" data-sign="aries">
+                        <div className="text-2xl mb-1">♈</div>
+                        <div className="text-xs">Aries</div>
+                      </div>
+                      <div className="zodiac-sign p-3 rounded-lg cursor-pointer text-center" data-sign="taurus">
+                        <div className="text-2xl mb-1">♉</div>
+                        <div className="text-xs">Taurus</div>
+                      </div>
+                      <div className="zodiac-sign p-3 rounded-lg cursor-pointer text-center" data-sign="gemini">
+                        <div className="text-2xl mb-1">♊</div>
+                        <div className="text-xs">Gemini</div>
+                      </div>
+                      <div className="zodiac-sign p-3 rounded-lg cursor-pointer text-center" data-sign="cancer">
+                        <div className="text-2xl mb-1">♋</div>
+                        <div className="text-xs">Cancer</div>
+                      </div>
+                      <div className="zodiac-sign p-3 rounded-lg cursor-pointer text-center" data-sign="leo">
+                        <div className="text-2xl mb-1">♌</div>
+                        <div className="text-xs">Leo</div>
+                      </div>
+                      <div className="zodiac-sign p-3 rounded-lg cursor-pointer text-center" data-sign="virgo">
+                        <div className="text-2xl mb-1">♍</div>
+                        <div className="text-xs">Virgo</div>
+                      </div>
+                      <div className="zodiac-sign p-3 rounded-lg cursor-pointer text-center" data-sign="libra">
+                        <div className="text-2xl mb-1">♎</div>
+                        <div className="text-xs">Libra</div>
+                      </div>
+                      <div className="zodiac-sign p-3 rounded-lg cursor-pointer text-center" data-sign="scorpio">
+                        <div className="text-2xl mb-1">♏</div>
+                        <div className="text-xs">Scorpio</div>
+                      </div>
+                      <div className="zodiac-sign p-3 rounded-lg cursor-pointer text-center" data-sign="sagittarius">
+                        <div className="text-2xl mb-1">♐</div>
+                        <div className="text-xs">Sagittarius</div>
+                      </div>
+                      <div className="zodiac-sign p-3 rounded-lg cursor-pointer text-center" data-sign="capricorn">
+                        <div className="text-2xl mb-1">♑</div>
+                        <div className="text-xs">Capricorn</div>
+                      </div>
+                      <div className="zodiac-sign p-3 rounded-lg cursor-pointer text-center" data-sign="aquarius">
+                        <div className="text-2xl mb-1">♒</div>
+                        <div className="text-xs">Aquarius</div>
+                      </div>
+                      <div className="zodiac-sign p-3 rounded-lg cursor-pointer text-center" data-sign="pisces">
+                        <div className="text-2xl mb-1">♓</div>
+                        <div className="text-xs">Pisces</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-gray-300 mb-3 text-center">Select Second Sign</label>
+                    <div className="grid grid-cols-4 gap-2" id="secondSignGrid">
+                      {/* Same grid structure as above */}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-gray-300 mb-2">Analysis Type</label>
+                    <select name="analysis_type" required 
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-cyan-500 focus:outline-none">
+                      <option value="romantic">Romantic Compatibility</option>
+                      <option value="friendship">Friendship Compatibility</option>
+                      <option value="business">Business Partnership</option>
+                      <option value="family">Family Dynamics</option>
+                      <option value="general">General Compatibility</option>
+                    </select>
+                  </div>
+                  
+                  <button type="submit" 
+                    className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 py-3 rounded-lg font-semibold hover:glow transition-all">
+                    <i className="fas fa-heart mr-2"></i>Analyze Compatibility
+                  </button>
+                </form>
+              </div>
+
+              {/* Zodiac Insights */}
+              <div className="bg-gray-800/30 backdrop-blur-sm border border-blue-500/30 rounded-xl p-8">
+                <div className="text-center mb-6">
+                  <div className="text-4xl text-blue-400 mb-4">
+                    <i className="fas fa-star"></i>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">Deep Zodiac Insights</h3>
+                  <p className="text-gray-400 mb-4">
+                    Comprehensive analysis of a single zodiac sign with AI-powered cosmic insights
+                  </p>
+                  <div className="text-yellow-400 font-semibold mb-4">
+                    <i className="fas fa-coins mr-2"></i>10 credits
+                  </div>
+                </div>
+                
+                <form id="insightsForm" className="space-y-6">
+                  <div>
+                    <label className="block text-gray-300 mb-3 text-center">Select Zodiac Sign</label>
+                    <div className="grid grid-cols-4 gap-2" id="insightSignGrid">
+                      {/* Same grid structure as compatibility */}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-gray-300 mb-2">Insight Focus</label>
+                    <select name="insight_type" required 
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+                      <option value="personality">Personality Traits</option>
+                      <option value="career">Career & Professional Life</option>
+                      <option value="relationships">Love & Relationships</option>
+                      <option value="health">Health & Wellness</option>
+                      <option value="finances">Money & Finances</option>
+                      <option value="spiritual">Spiritual Growth</option>
+                      <option value="challenges">Life Challenges & Growth</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-gray-300 mb-2">Time Period</label>
+                    <select name="time_period" required 
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+                      <option value="current">Current Influences</option>
+                      <option value="monthly">This Month</option>
+                      <option value="yearly">This Year</option>
+                      <option value="general">General Traits</option>
+                    </select>
+                  </div>
+                  
+                  <button type="submit" 
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 py-3 rounded-lg font-semibold hover:glow transition-all">
+                    <i className="fas fa-magic mr-2"></i>Generate Insights
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {/* Results Section */}
+            <div id="results" className="hidden">
+              <div className="bg-gray-800/30 backdrop-blur-sm border border-green-500/30 rounded-xl p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold text-green-400">
+                    <i className="fas fa-magic mr-2"></i>Your Cosmic Analysis
+                  </h3>
+                  <button id="saveReading" className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
+                    <i className="fas fa-save mr-2"></i>Save to Library
+                  </button>
+                </div>
+                <div id="analysisContent" className="prose prose-invert max-w-none">
+                  {/* Generated content will appear here */}
+                </div>
+              </div>
+            </div>
+
+            {/* Loading State */}
+            <div id="loading" className="hidden text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400 mb-4"></div>
+              <p className="text-gray-300">The cosmic library is opening your zodiac insights...</p>
+            </div>
+          </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+        <script>{`
+          let selectedFirstSign = null;
+          let selectedSecondSign = null;
+          let selectedInsightSign = null;
+          
+          document.addEventListener('DOMContentLoaded', function() {
+            loadUserProfile();
+            setupZodiacGrids();
+            document.getElementById('compatibilityForm').addEventListener('submit', handleCompatibilityForm);
+            document.getElementById('insightsForm').addEventListener('submit', handleInsightsForm);
+          });
+          
+          function setupZodiacGrids() {
+            // Setup zodiac sign grids
+            const signs = [
+              {sign: 'aries', symbol: '♈', name: 'Aries'},
+              {sign: 'taurus', symbol: '♉', name: 'Taurus'},
+              {sign: 'gemini', symbol: '♊', name: 'Gemini'},
+              {sign: 'cancer', symbol: '♋', name: 'Cancer'},
+              {sign: 'leo', symbol: '♌', name: 'Leo'},
+              {sign: 'virgo', symbol: '♍', name: 'Virgo'},
+              {sign: 'libra', symbol: '♎', name: 'Libra'},
+              {sign: 'scorpio', symbol: '♏', name: 'Scorpio'},
+              {sign: 'sagittarius', symbol: '♐', name: 'Sagittarius'},
+              {sign: 'capricorn', symbol: '♑', name: 'Capricorn'},
+              {sign: 'aquarius', symbol: '♒', name: 'Aquarius'},
+              {sign: 'pisces', symbol: '♓', name: 'Pisces'}
+            ];
+            
+            // Create second sign grid
+            const secondGrid = document.getElementById('secondSignGrid');
+            secondGrid.innerHTML = signs.map(s => \`
+              <div class="zodiac-sign p-3 rounded-lg cursor-pointer text-center" data-sign="\${s.sign}">
+                <div class="text-2xl mb-1">\${s.symbol}</div>
+                <div class="text-xs">\${s.name}</div>
+              </div>
+            \`).join('');
+            
+            // Create insight sign grid
+            const insightGrid = document.getElementById('insightSignGrid');
+            insightGrid.innerHTML = signs.map(s => \`
+              <div class="zodiac-sign p-3 rounded-lg cursor-pointer text-center" data-sign="\${s.sign}">
+                <div class="text-2xl mb-1">\${s.symbol}</div>
+                <div class="text-xs">\${s.name}</div>
+              </div>
+            \`).join('');
+            
+            // Setup click handlers
+            setupSignSelection('firstSignGrid', (sign) => selectedFirstSign = sign);
+            setupSignSelection('secondSignGrid', (sign) => selectedSecondSign = sign);
+            setupSignSelection('insightSignGrid', (sign) => selectedInsightSign = sign);
+          }
+          
+          function setupSignSelection(gridId, callback) {
+            const grid = document.getElementById(gridId);
+            grid.addEventListener('click', (e) => {
+              const signElement = e.target.closest('.zodiac-sign');
+              if (!signElement) return;
+              
+              // Clear previous selection in this grid
+              grid.querySelectorAll('.zodiac-sign').forEach(el => el.classList.remove('selected'));
+              
+              // Select new sign
+              signElement.classList.add('selected');
+              callback(signElement.dataset.sign);
+            });
+          }
+          
+          async function loadUserProfile() {
+            try {
+              const token = localStorage.getItem('auth_token');
+              if (!token) {
+                document.getElementById('auth-buttons').classList.remove('hidden');
+                return;
+              }
+              
+              const response = await axios.get('/api/auth/profile', {
+                headers: { Authorization: \`Bearer \${token}\` }
+              });
+              
+              if (response.data.success) {
+                document.getElementById('credits').textContent = response.data.credits;
+                document.getElementById('auth-buttons').classList.add('hidden');
+                document.getElementById('user-menu').classList.remove('hidden');
+                
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                  localStorage.removeItem('auth_token');
+                  window.location.href = '/';
+                });
+              }
+            } catch (error) {
+              console.error('Failed to load profile:', error);
+              document.getElementById('auth-buttons').classList.remove('hidden');
+            }
+          }
+          
+          async function handleCompatibilityForm(e) {
+            e.preventDefault();
+            
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+              alert('Please login to get zodiac analysis');
+              window.location.href = '/login';
+              return;
+            }
+            
+            if (!selectedFirstSign || !selectedSecondSign) {
+              alert('Please select both zodiac signs');
+              return;
+            }
+            
+            const formData = new FormData(e.target);
+            const data = {
+              type: 'compatibility',
+              first_sign: selectedFirstSign,
+              second_sign: selectedSecondSign,
+              analysis_type: formData.get('analysis_type')
+            };
+            
+            await generateZodiacAnalysis(data, token);
+          }
+          
+          async function handleInsightsForm(e) {
+            e.preventDefault();
+            
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+              alert('Please login to get zodiac analysis');
+              window.location.href = '/login';
+              return;
+            }
+            
+            if (!selectedInsightSign) {
+              alert('Please select a zodiac sign');
+              return;
+            }
+            
+            const formData = new FormData(e.target);
+            const data = {
+              type: 'insights',
+              zodiac_sign: selectedInsightSign,
+              insight_type: formData.get('insight_type'),
+              time_period: formData.get('time_period')
+            };
+            
+            await generateZodiacAnalysis(data, token);
+          }
+          
+          async function generateZodiacAnalysis(data, token) {
+            try {
+              document.getElementById('loading').classList.remove('hidden');
+              document.getElementById('results').classList.add('hidden');
+              
+              const response = await axios.post('/api/ai/zodiac/generate', data, {
+                headers: { 
+                  Authorization: \`Bearer \${token}\`,
+                  'Content-Type': 'application/json'
+                }
+              });
+              
+              if (response.data.success) {
+                document.getElementById('analysisContent').innerHTML = 
+                  '<div class="whitespace-pre-wrap text-gray-100">' + response.data.content + '</div>';
+                document.getElementById('results').classList.remove('hidden');
+                
+                // Update credits display
+                const creditsElement = document.getElementById('credits');
+                const currentCredits = parseInt(creditsElement.textContent);
+                creditsElement.textContent = currentCredits - 10;
+                
+                // Setup save button
+                document.getElementById('saveReading').onclick = () => saveToLibrary(response.data.reading_id);
+              } else {
+                alert(response.data.error || 'Failed to generate zodiac analysis');
+              }
+            } catch (error) {
+              console.error('Generation error:', error);
+              alert(error.response?.data?.error || 'Failed to generate zodiac analysis');
+            } finally {
+              document.getElementById('loading').classList.add('hidden');
+            }
+          }
+          
+          async function saveToLibrary(readingId) {
+            try {
+              const token = localStorage.getItem('auth_token');
+              const response = await axios.post('/api/ai/save-reading', 
+                { reading_id: readingId },
+                { headers: { Authorization: \`Bearer \${token}\` } }
+              );
+              
+              if (response.data.success) {
+                alert('Analysis saved to your library!');
+                document.getElementById('saveReading').innerHTML = 
+                  '<i class="fas fa-check mr-2"></i>Saved';
+                document.getElementById('saveReading').disabled = true;
+              }
+            } catch (error) {
+              console.error('Save error:', error);
+              alert('Failed to save analysis');
+            }
+          }
+        `}</script>
+      </body>
+    </html>
+  )
+})
+
+// Dashboard page
+app.get('/dashboard', (c) => {
+  return c.render(
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Dashboard - AstroLuna</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+        <style>{`
+          body { 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+          }
+          .glow { 
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+          }
+        `}</style>
+      </head>
+      <body className="text-white">
+        {/* Navigation */}
+        <nav className="fixed top-0 w-full z-50 bg-black/20 backdrop-blur-md border-b border-purple-500/20">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-8">
+                <a href="/" className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
+                  AstroLuna
+                </a>
+                <div className="hidden md:flex space-x-6">
+                  <a href="/astroscope" className="text-gray-300 hover:text-purple-400 transition-colors">AstroScope</a>
+                  <a href="/tarotpath" className="text-gray-300 hover:text-purple-400 transition-colors">TarotPath</a>
+                  <a href="/zodiac" className="text-gray-300 hover:text-purple-400 transition-colors">ZodiacTome</a>
+                  <a href="/dashboard" className="text-purple-400 font-semibold">Dashboard</a>
+                </div>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div id="credits-display" className="bg-gray-800/50 px-3 py-1 rounded text-sm">
+                  <i className="fas fa-coins text-yellow-400 mr-1"></i>
+                  <span id="credits">0</span> credits
+                </div>
+                <button id="checkout-btn" className="bg-gradient-to-r from-green-600 to-emerald-600 px-4 py-2 rounded-lg hover:glow transition-all">
+                  <i className="fas fa-plus mr-1"></i> Buy Credits
+                </button>
+                <button id="logout-btn" className="text-gray-300 hover:text-white">
+                  <i className="fas fa-sign-out-alt mr-1"></i> Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        {/* Main Content */}
+        <div className="pt-24 min-h-screen">
+          <div className="max-w-6xl mx-auto px-6 py-8">
+            <div className="mb-8">
+              <h1 className="text-4xl font-bold mb-2">
+                Welcome back, <span id="userName">User</span>!
+              </h1>
+              <p className="text-gray-400">Manage your cosmic journey and explore your celestial insights</p>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid md:grid-cols-4 gap-6 mb-8">
+              <div className="bg-gray-800/30 backdrop-blur-sm border border-purple-500/30 rounded-xl p-6 text-center">
+                <div className="text-3xl text-purple-400 mb-2">
+                  <i className="fas fa-coins"></i>
+                </div>
+                <div className="text-2xl font-bold" id="totalCredits">0</div>
+                <div className="text-sm text-gray-400">Available Credits</div>
+              </div>
+              
+              <div className="bg-gray-800/30 backdrop-blur-sm border border-blue-500/30 rounded-xl p-6 text-center">
+                <div className="text-3xl text-blue-400 mb-2">
+                  <i className="fas fa-moon"></i>
+                </div>
+                <div className="text-2xl font-bold" id="horoscopeCount">0</div>
+                <div className="text-sm text-gray-400">Horoscopes</div>
+              </div>
+              
+              <div className="bg-gray-800/30 backdrop-blur-sm border border-pink-500/30 rounded-xl p-6 text-center">
+                <div className="text-3xl text-pink-400 mb-2">
+                  <i className="fas fa-cards-blank"></i>
+                </div>
+                <div className="text-2xl font-bold" id="tarotCount">0</div>
+                <div className="text-sm text-gray-400">Tarot Readings</div>
+              </div>
+              
+              <div className="bg-gray-800/30 backdrop-blur-sm border border-cyan-500/30 rounded-xl p-6 text-center">
+                <div className="text-3xl text-cyan-400 mb-2">
+                  <i className="fas fa-star"></i>
+                </div>
+                <div className="text-2xl font-bold" id="zodiacCount">0</div>
+                <div className="text-sm text-gray-400">Zodiac Analysis</div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid md:grid-cols-3 gap-6 mb-8">
+              <a href="/astroscope" className="bg-gray-800/30 backdrop-blur-sm border border-purple-500/30 rounded-xl p-6 hover:border-purple-500/60 transition-colors block">
+                <div className="text-center">
+                  <div className="text-4xl text-purple-400 mb-3">
+                    <i className="fas fa-moon"></i>
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Get Horoscope</h3>
+                  <p className="text-gray-400 text-sm">Generate personalized cosmic insights</p>
+                </div>
+              </a>
+              
+              <a href="/tarotpath" className="bg-gray-800/30 backdrop-blur-sm border border-pink-500/30 rounded-xl p-6 hover:border-pink-500/60 transition-colors block">
+                <div className="text-center">
+                  <div className="text-4xl text-pink-400 mb-3">
+                    <i className="fas fa-cards-blank"></i>
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Draw Tarot Cards</h3>
+                  <p className="text-gray-400 text-sm">Reveal your lunar path guidance</p>
+                </div>
+              </a>
+              
+              <a href="/zodiac" className="bg-gray-800/30 backdrop-blur-sm border border-cyan-500/30 rounded-xl p-6 hover:border-cyan-500/60 transition-colors block">
+                <div className="text-center">
+                  <div className="text-4xl text-cyan-400 mb-3">
+                    <i className="fas fa-star-of-david"></i>
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Zodiac Analysis</h3>
+                  <p className="text-gray-400 text-sm">Explore compatibility & insights</p>
+                </div>
+              </a>
+            </div>
+
+            {/* Recent Readings */}
+            <div className="bg-gray-800/30 backdrop-blur-sm border border-gray-500/30 rounded-xl p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold">Recent Readings</h3>
+                <button id="loadMoreReadings" className="text-purple-400 hover:text-purple-300">
+                  <i className="fas fa-refresh mr-1"></i> Refresh
+                </button>
+              </div>
+              
+              <div id="recentReadings" className="space-y-4">
+                <div className="text-center py-8 text-gray-400">
+                  <i className="fas fa-magic text-3xl mb-4"></i>
+                  <p>Your cosmic readings will appear here</p>
+                  <p className="text-sm">Start your journey by getting your first reading!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+        <script>{`
+          document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+            
+            // Setup event listeners
+            document.getElementById('checkout-btn').addEventListener('click', () => {
+              window.location.href = '/checkout';
+            });
+            
+            document.getElementById('logout-btn').addEventListener('click', () => {
+              localStorage.removeItem('auth_token');
+              window.location.href = '/';
+            });
+            
+            document.getElementById('loadMoreReadings').addEventListener('click', loadRecentReadings);
+          });
+          
+          async function loadDashboard() {
+            try {
+              const token = localStorage.getItem('auth_token');
+              if (!token) {
+                window.location.href = '/login';
+                return;
+              }
+              
+              const response = await axios.get('/api/auth/profile', {
+                headers: { Authorization: \`Bearer \${token}\` }
+              });
+              
+              if (response.data.success) {
+                const user = response.data.user;
+                
+                // Update user info
+                document.getElementById('userName').textContent = user.full_name || 'User';
+                document.getElementById('credits').textContent = response.data.credits;
+                document.getElementById('totalCredits').textContent = response.data.credits;
+                
+                // Load reading statistics (mock for now)
+                document.getElementById('horoscopeCount').textContent = '0';
+                document.getElementById('tarotCount').textContent = '0';
+                document.getElementById('zodiacCount').textContent = '0';
+                
+                // Load recent readings
+                await loadRecentReadings();
+              } else {
+                window.location.href = '/login';
+              }
+            } catch (error) {
+              console.error('Failed to load dashboard:', error);
+              window.location.href = '/login';
+            }
+          }
+          
+          async function loadRecentReadings() {
+            try {
+              const token = localStorage.getItem('auth_token');
+              
+              // For now, show placeholder content
+              // In a real implementation, this would fetch from API
+              const recentReadings = document.getElementById('recentReadings');
+              recentReadings.innerHTML = \`
+                <div class="text-center py-8 text-gray-400">
+                  <i class="fas fa-magic text-3xl mb-4"></i>
+                  <p>Your cosmic readings will appear here</p>
+                  <p class="text-sm">Start your journey by getting your first reading!</p>
+                </div>
+              \`;
+              
+            } catch (error) {
+              console.error('Failed to load recent readings:', error);
+            }
+          }
+        `}</script>
       </body>
     </html>
   )

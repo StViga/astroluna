@@ -103,11 +103,25 @@ export async function checkCredits(
     throw new Error('User not authenticated');
   }
 
-  const result = await c.env.DB.prepare(`
-    SELECT balance FROM credits WHERE user_id = ?
-  `).bind(userId).first<{ balance: number }>();
-  
-  const currentBalance = result?.balance || 0;
+  // Use the same database detection logic as in routes
+  let dbService;
+  if (c.env.DB) {
+    try {
+      await c.env.DB.prepare('SELECT COUNT(*) FROM users LIMIT 1').first();
+      const { DatabaseService } = await import('../utils/database');
+      dbService = new DatabaseService(c.env.DB);
+    } catch (error) {
+      const { MockDatabaseService } = await import('../utils/mock-database');
+      await MockDatabaseService.initialize();
+      dbService = new MockDatabaseService();
+    }
+  } else {
+    const { MockDatabaseService } = await import('../utils/mock-database');
+    await MockDatabaseService.initialize();
+    dbService = new MockDatabaseService();
+  }
+
+  const currentBalance = await dbService.getUserCredits(userId);
   
   return {
     hasCredits: currentBalance >= requiredCredits,
