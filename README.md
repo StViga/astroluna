@@ -15,16 +15,23 @@
 ## ✅ Currently Implemented Features
 
 ### 🔐 Authentication System
-- **User Registration:** Complete signup flow with validation
-- **Login/Logout:** JWT-based authentication
+- **User Registration:** Complete signup flow with validation (/signup)
+- **Login/Logout:** JWT-based authentication (/login)
 - **Password Reset:** Token-based password recovery system
 - **Profile Management:** User profile with credits tracking
 
 ### 💰 Credit System & Currency Management
 - **Multi-currency Support:** EUR (base), USD, GBP with live exchange rates
 - **NBU API Integration:** Real-time currency conversion using National Bank of Ukraine API
-- **Credit Packages:** Tiered pricing with bonus credits
+- **Credit Packages:** Tiered pricing with bonus credits (5€ = 50 credits, up to 2000€ = 32,000 credits)
 - **Transaction History:** Complete audit trail for all credit operations
+
+### 💳 Payment Processing System
+- **SPC Payment Gateway:** Full integration with Talentmap secure payment processing
+- **Checkout Flow:** Multi-step checkout with package selection, billing info, and secure payment
+- **Webhook Processing:** Real-time payment status updates and credit allocation
+- **Security:** HMAC signature verification, encrypted payment data, PCI compliance
+- **Test Environment:** Sandbox mode with test card numbers (4111 1111 1111 1111)
 
 ### 🎨 Frontend UI/UX
 - **Modern Design:** Dark theme with purple/blue gradient aesthetics
@@ -32,6 +39,9 @@
 - **Interactive Navigation:** Fixed header with service links and currency/language selectors
 - **Hero Section:** Stunning landing page with animated starfield background
 - **Service Cards:** Visual preview of all three core services
+- **Checkout System:** Multi-step checkout process with progress tracking
+- **Authentication Pages:** Professional login/signup forms with validation
+- **Payment Success/Cancel:** Dedicated result pages with clear status indication
 
 ### 🛠 Backend Infrastructure
 - **Hono Framework:** Lightweight, fast web framework optimized for Cloudflare Workers
@@ -55,6 +65,13 @@
 - `POST /api/currency/convert` - Convert between currencies
 - `GET /api/currency/supported` - List supported currencies
 - `POST /api/currency/checkout/quote` - Create fixed-rate checkout quote
+
+### Payment Processing
+- `POST /api/payments/checkout/init` - Initialize secure payment with SPC Gateway
+- `POST /api/payments/webhook` - Handle payment status webhooks from SPC
+- `GET /api/payments/status/:transactionId` - Get transaction status
+- `GET /api/payments/history` - Get user's transaction history
+- `GET /api/payments/test-connection` - Test SPC API connectivity (dev only)
 
 ### System
 - `GET /api/health` - Health check endpoint

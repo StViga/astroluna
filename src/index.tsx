@@ -16,9 +16,14 @@ app.use('/api/*', rateLimit(100, 15 * 60 * 1000)) // 100 requests per 15 minutes
 // Use renderer for HTML pages
 app.use(renderer)
 
+// Import payment routes
+import paymentRoutes from './routes/payments'
+import { CheckoutPage } from './components/checkout'
+
 // API routes
 app.route('/api/auth', authRoutes)
 app.route('/api/currency', currencyRoutes)
+app.route('/api/payments', paymentRoutes)
 
 // Health check endpoint
 app.get('/api/health', (c) => {
@@ -71,26 +76,36 @@ app.get('/', (c) => {
                 </div>
               </div>
               <div className="flex items-center space-x-4">
-                <select className="bg-gray-800/50 border border-gray-600 rounded px-2 py-1 text-sm">
+                <select id="currency-selector" className="bg-gray-800/50 border border-gray-600 rounded px-2 py-1 text-sm">
                   <option value="EUR">€ EUR</option>
                   <option value="USD">$ USD</option>
                   <option value="GBP">£ GBP</option>
                 </select>
-                <select className="bg-gray-800/50 border border-gray-600 rounded px-2 py-1 text-sm">
+                <select id="language-selector" className="bg-gray-800/50 border border-gray-600 rounded px-2 py-1 text-sm">
                   <option value="en">English</option>
                   <option value="es">Español</option>
                   <option value="de">Deutsch</option>
                 </select>
-                <div className="bg-gray-800/50 px-3 py-1 rounded text-sm">
+                <div id="credits-display" className="bg-gray-800/50 px-3 py-1 rounded text-sm">
                   <i className="fas fa-coins text-yellow-400 mr-1"></i>
                   <span id="credits">0</span> credits
                 </div>
-                <button className="bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg hover:glow transition-all">
-                  Login
-                </button>
-                <button className="border border-purple-500 px-4 py-2 rounded-lg hover:bg-purple-500/20 transition-colors">
-                  Sign Up
-                </button>
+                <div id="auth-buttons">
+                  <a href="/login" className="bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg hover:glow transition-all inline-block">
+                    Login
+                  </a>
+                  <a href="/signup" className="border border-purple-500 px-4 py-2 rounded-lg hover:bg-purple-500/20 transition-colors inline-block ml-2">
+                    Sign Up
+                  </a>
+                </div>
+                <div id="user-menu" className="hidden">
+                  <button id="checkout-btn" className="bg-gradient-to-r from-green-600 to-emerald-600 px-4 py-2 rounded-lg hover:glow transition-all mr-2">
+                    <i className="fas fa-plus mr-1"></i> Buy Credits
+                  </button>
+                  <button id="logout-btn" className="text-gray-300 hover:text-white">
+                    <i className="fas fa-sign-out-alt mr-1"></i> Logout
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -198,12 +213,35 @@ app.get('/', (c) => {
               });
               
               if (response.data.success) {
+                // Update credits display
                 document.getElementById('credits').textContent = response.data.credits;
-                // Update UI for logged in user
+                
+                // Update currency selector
+                const currencySelector = document.getElementById('currency-selector');
+                currencySelector.value = response.data.user.currency || 'EUR';
+                
+                // Update language selector  
+                const languageSelector = document.getElementById('language-selector');
+                languageSelector.value = response.data.user.language || 'en';
+                
+                // Show user menu, hide auth buttons
+                document.getElementById('auth-buttons').classList.add('hidden');
+                document.getElementById('user-menu').classList.remove('hidden');
+                
+                // Setup user menu event listeners
+                document.getElementById('checkout-btn').addEventListener('click', () => {
+                  window.location.href = '/checkout';
+                });
+                
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                  localStorage.removeItem('auth_token');
+                  window.location.reload();
+                });
               }
             } catch (error) {
               console.error('Failed to load profile:', error);
               localStorage.removeItem('auth_token');
+              // Keep auth buttons visible for guests
             }
           }
           
@@ -220,6 +258,88 @@ app.get('/', (c) => {
             }
           }
         `}</script>
+      </body>
+    </html>
+  )
+})
+
+// Checkout page
+app.get('/checkout', (c) => {
+  return c.render(<CheckoutPage />)
+})
+
+// Checkout success page
+app.get('/checkout/success', (c) => {
+  const transactionId = c.req.query('transaction_id') || 'unknown';
+  
+  return c.render(
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Payment Successful - AstroLuna</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+      </head>
+      <body className="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen flex items-center justify-center text-white">
+        <div className="text-center max-w-md mx-auto p-8">
+          <div className="mb-6">
+            <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i className="fas fa-check text-3xl text-white"></i>
+            </div>
+            <h1 className="text-3xl font-bold mb-2">Payment Successful!</h1>
+            <p className="text-gray-300">Your credits have been added to your account</p>
+          </div>
+          
+          <div className="bg-black/20 backdrop-blur-md p-6 rounded-xl border border-green-500/30 mb-6">
+            <p className="text-sm text-gray-400 mb-2">Transaction ID:</p>
+            <p className="font-mono text-sm break-all">{transactionId}</p>
+          </div>
+          
+          <div className="space-y-3">
+            <a href="/dashboard" className="block w-full bg-gradient-to-r from-purple-600 to-blue-600 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+              Go to Dashboard
+            </a>
+            <a href="/" className="block w-full border border-gray-600 py-3 rounded-lg font-semibold hover:bg-gray-600/20 transition-colors">
+              Back to Home
+            </a>
+          </div>
+        </div>
+      </body>
+    </html>
+  )
+})
+
+// Checkout cancel page
+app.get('/checkout/cancel', (c) => {
+  return c.render(
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Payment Cancelled - AstroLuna</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+      </head>
+      <body className="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen flex items-center justify-center text-white">
+        <div className="text-center max-w-md mx-auto p-8">
+          <div className="mb-6">
+            <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i className="fas fa-times text-3xl text-white"></i>
+            </div>
+            <h1 className="text-3xl font-bold mb-2">Payment Cancelled</h1>
+            <p className="text-gray-300">Your payment was cancelled. No charges were made.</p>
+          </div>
+          
+          <div className="space-y-3">
+            <a href="/checkout" className="block w-full bg-gradient-to-r from-purple-600 to-blue-600 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+              Try Again
+            </a>
+            <a href="/" className="block w-full border border-gray-600 py-3 rounded-lg font-semibold hover:bg-gray-600/20 transition-colors">
+              Back to Home
+            </a>
+          </div>
+        </div>
       </body>
     </html>
   )
@@ -295,6 +415,159 @@ app.get('/login', (c) => {
               }
             } catch (error) {
               const message = error.response?.data?.error || 'Login failed';
+              alert(message);
+            }
+          });
+        `}</script>
+      </body>
+    </html>
+  )
+})
+
+// Signup page
+app.get('/signup', (c) => {
+  return c.render(
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Sign Up - AstroLuna</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+      </head>
+      <body className="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen flex items-center justify-center">
+        <div className="bg-black/20 backdrop-blur-md p-8 rounded-xl border border-purple-500/30 w-full max-w-lg">
+          <h1 className="text-3xl font-bold text-center text-white mb-8">Join AstroLuna</h1>
+          <form id="signupForm" className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-gray-300 mb-2">Full Name</label>
+                <input 
+                  type="text" 
+                  name="full_name" 
+                  required 
+                  className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none"
+                  placeholder="John Doe"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-2">Phone</label>
+                <input 
+                  type="tel" 
+                  name="phone" 
+                  required 
+                  className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none"
+                  placeholder="+1234567890"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-gray-300 mb-2">Email</label>
+              <input 
+                type="email" 
+                name="email" 
+                required 
+                className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none"
+                placeholder="your@email.com"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-gray-300 mb-2">Password</label>
+                <input 
+                  type="password" 
+                  name="password" 
+                  required 
+                  minLength="6"
+                  className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none"
+                  placeholder="••••••••"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-2">Confirm Password</label>
+                <input 
+                  type="password" 
+                  name="confirm_password" 
+                  required 
+                  minLength="6"
+                  className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none"
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-gray-300 mb-2">Language</label>
+                <select name="language" className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none">
+                  <option value="en">English</option>
+                  <option value="es">Español</option>
+                  <option value="de">Deutsch</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-2">Currency</label>
+                <select name="currency" className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none">
+                  <option value="EUR">€ EUR</option>
+                  <option value="USD">$ USD</option>
+                  <option value="GBP">£ GBP</option>
+                </select>
+              </div>
+            </div>
+            <div className="mt-6">
+              <label className="flex items-center space-x-3">
+                <input type="checkbox" name="privacy_accepted" required className="w-5 h-5 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500" />
+                <span className="text-sm text-gray-300">
+                  I consent to the <a href="/privacy" className="text-purple-400 hover:text-purple-300 underline">Privacy Policy</a> and 
+                  <a href="/terms" className="text-purple-400 hover:text-purple-300 underline"> User Terms</a>
+                </span>
+              </label>
+            </div>
+            <button 
+              type="submit" 
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 py-3 rounded-lg font-semibold text-white hover:opacity-90 transition-opacity"
+            >
+              Create Account
+            </button>
+          </form>
+          <div className="mt-6 text-center">
+            <span className="text-gray-400">Already have an account? </span>
+            <a href="/login" className="text-purple-400 hover:text-purple-300">Sign in</a>
+          </div>
+        </div>
+        
+        <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+        <script>{`
+          document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+              full_name: formData.get('full_name'),
+              email: formData.get('email'),
+              phone: formData.get('phone'),
+              password: formData.get('password'),
+              confirm_password: formData.get('confirm_password'),
+              language: formData.get('language'),
+              currency: formData.get('currency'),
+              privacy_accepted: formData.get('privacy_accepted') === 'on'
+            };
+            
+            // Validate password match
+            if (data.password !== data.confirm_password) {
+              alert('Passwords do not match');
+              return;
+            }
+            
+            try {
+              const response = await axios.post('/api/auth/signup', data);
+              
+              if (response.data.success) {
+                localStorage.setItem('auth_token', response.data.token);
+                alert('Account created successfully! Welcome to AstroLuna!');
+                window.location.href = '/';
+              }
+            } catch (error) {
+              const message = error.response?.data?.error || 'Registration failed';
               alert(message);
             }
           });
