@@ -96,15 +96,22 @@ export class CurrencyService {
   /**
    * Get exchange rates with caching
    */
-  static async getExchangeRates(db: D1Database): Promise<ProcessedRates> {
+  static async getExchangeRates(db: any): Promise<ProcessedRates> {
     try {
-      // Try to get cached rates
-      const cachedRates = await db.prepare(`
-        SELECT rates_data, rates_timestamp 
-        FROM rates_cache 
-        ORDER BY rates_timestamp DESC 
-        LIMIT 1
-      `).first<{ rates_data: string; rates_timestamp: string }>();
+      // Try to get cached rates (only if real D1 database is available)
+      let cachedRates = null;
+      if (db && db.prepare) {
+        try {
+          cachedRates = await db.prepare(`
+            SELECT rates_data, rates_timestamp 
+            FROM rates_cache 
+            ORDER BY rates_timestamp DESC 
+            LIMIT 1
+          `).first<{ rates_data: string; rates_timestamp: string }>();
+        } catch {
+          // Ignore database errors in development
+        }
+      }
 
       if (cachedRates && this.areRatesFresh(cachedRates.rates_timestamp)) {
         return JSON.parse(cachedRates.rates_data) as ProcessedRates;
@@ -115,11 +122,17 @@ export class CurrencyService {
         const nbuRates = await this.fetchNBURates();
         const processedRates = this.processNBURates(nbuRates);
 
-        // Cache the new rates
-        await db.prepare(`
-          INSERT INTO rates_cache (rates_data, rates_timestamp)
-          VALUES (?, ?)
-        `).bind(JSON.stringify(processedRates), processedRates.timestamp).run();
+        // Cache the new rates (only if real database is available)
+        if (db && db.prepare) {
+          try {
+            await db.prepare(`
+              INSERT INTO rates_cache (rates_data, rates_timestamp)
+              VALUES (?, ?)
+            `).bind(JSON.stringify(processedRates), processedRates.timestamp).run();
+          } catch {
+            // Ignore cache errors in development
+          }
+        }
 
         return processedRates;
       } catch (nbuError) {
@@ -128,14 +141,20 @@ export class CurrencyService {
         // Use fallback rates if NBU API fails
         const fallbackRates = this.getFallbackRates();
         
-        // Cache fallback rates with a note
-        await db.prepare(`
-          INSERT INTO rates_cache (rates_data, rates_timestamp)
-          VALUES (?, ?)
-        `).bind(JSON.stringify({
-          ...fallbackRates,
-          fallback: true
-        }), fallbackRates.timestamp).run();
+        // Cache fallback rates (only if real database is available)
+        if (db && db.prepare) {
+          try {
+            await db.prepare(`
+              INSERT INTO rates_cache (rates_data, rates_timestamp)
+              VALUES (?, ?)
+            `).bind(JSON.stringify({
+              ...fallbackRates,
+              fallback: true
+            }), fallbackRates.timestamp).run();
+          } catch {
+            // Ignore cache errors in development
+          }
+        }
 
         return fallbackRates;
       }

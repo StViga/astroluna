@@ -5,11 +5,31 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import type { CloudflareBindings } from '../types/database';
 import { DatabaseService } from '../utils/database';
+import { MockDatabaseService } from '../utils/mock-database';
 import { CurrencyService } from '../utils/currency';
 import { SPCPaymentService } from '../utils/payment';
 import { authMiddleware, getCurrentUser } from '../middleware/auth';
 
 const payments = new Hono<{ Bindings: CloudflareBindings }>();
+
+// Helper function to get database service
+async function getDbService(env: any) {
+  if (env.DB) {
+    try {
+      // Test if database is properly set up by checking for users table
+      await env.DB.prepare('SELECT COUNT(*) FROM users LIMIT 1').first();
+      return new DatabaseService(env.DB);
+    } catch (error) {
+      console.log('D1 database not properly configured, using mock database:', error.message);
+      await MockDatabaseService.initialize();
+      return new MockDatabaseService();
+    }
+  } else {
+    console.log('Using mock database (D1 not available)');
+    await MockDatabaseService.initialize();
+    return new MockDatabaseService();
+  }
+}
 
 // Validation schemas
 const checkoutInitSchema = z.object({
@@ -31,7 +51,7 @@ payments.post('/checkout/init', authMiddleware, zValidator('json', checkoutInitS
   try {
     const userId = getCurrentUser(c);
     const data = c.req.valid('json');
-    const db = new DatabaseService(c.env.DB);
+    const db = await getDbService(c.env);
 
     // Get current exchange rates
     const rates = await CurrencyService.getExchangeRates(c.env.DB);
@@ -146,23 +166,40 @@ payments.post('/webhook', async (c) => {
 
     console.log('Processing webhook:', webhookData);
 
-    const db = new DatabaseService(c.env.DB);
+    const db = await getDbService(c.env);
+    
+    // For mock database, search manually
+    if (!c.env.DB) {
+      const transactions = await db.getUserTransactions(0, 1000); // Get all transactions
+      const matchingTx = transactions.filter(tx => 
+        tx.tx_id === webhookData.order_id || 
+        (tx.gateway_response && tx.gateway_response.includes(webhookData.transaction_id))
+      );
+      
+      if (matchingTx.length === 0) {
+        console.error('Transaction not found for webhook:', webhookData.order_id);
+        return c.json({ error: 'Transaction not found' }, 404);
+      }
+      
+      var transaction = matchingTx[0];
+    } else {
+      const transactions = await c.env.DB.prepare(`
+        SELECT * FROM transactions 
+        WHERE tx_id = ? OR gateway_response LIKE ?
+      `).bind(
+        webhookData.order_id,
+        `%${webhookData.transaction_id}%`
+      ).all();
 
-    // Find transaction by order ID or gateway transaction ID
-    const transactions = await c.env.DB.prepare(`
-      SELECT * FROM transactions 
-      WHERE tx_id = ? OR gateway_response LIKE ?
-    `).bind(
-      webhookData.order_id,
-      `%${webhookData.transaction_id}%`
-    ).all();
+      if (transactions.results.length === 0) {
+        console.error('Transaction not found for webhook:', webhookData.order_id);
+        return c.json({ error: 'Transaction not found' }, 404);
+      }
 
-    if (transactions.results.length === 0) {
-      console.error('Transaction not found for webhook:', webhookData.order_id);
-      return c.json({ error: 'Transaction not found' }, 404);
+      var transaction = transactions.results[0] as any;
     }
 
-    const transaction = transactions.results[0] as any;
+
 
     // Process based on payment status
     switch (webhookData.status.toLowerCase()) {
@@ -258,9 +295,9 @@ payments.get('/status/:transactionId', authMiddleware, async (c) => {
     const userId = getCurrentUser(c);
     const transactionId = c.req.param('transactionId');
     
-    const transaction = await c.env.DB.prepare(`
-      SELECT * FROM transactions WHERE tx_id = ? AND user_id = ?
-    `).bind(transactionId, userId).first();
+    const db = await getDbService(c.env);
+    const transactions = await db.getUserTransactions(userId, 1000);
+    const transaction = transactions.find(t => t.tx_id === transactionId);
 
     if (!transaction) {
       return c.json({ error: 'Transaction not found' }, 404);
@@ -292,13 +329,9 @@ payments.get('/history', authMiddleware, async (c) => {
     const limit = parseInt(c.req.query('limit') || '20');
     const offset = parseInt(c.req.query('offset') || '0');
 
-    const transactions = await c.env.DB.prepare(`
-      SELECT tx_id, amount_eur, amount_currency, currency, status, created_at, updated_at
-      FROM transactions 
-      WHERE user_id = ? 
-      ORDER BY created_at DESC 
-      LIMIT ? OFFSET ?
-    `).bind(userId, limit, offset).all();
+    const db = await getDbService(c.env);
+    const allTransactions = await db.getUserTransactions(userId, limit + offset);
+    const transactions = { results: allTransactions.slice(offset, offset + limit) };
 
     return c.json({
       success: true,

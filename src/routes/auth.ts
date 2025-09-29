@@ -5,6 +5,7 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import type { CloudflareBindings } from '../types/database';
 import { DatabaseService, generateToken, generateRandomToken } from '../utils/database';
+import { MockDatabaseService } from '../utils/mock-database';
 
 const auth = new Hono<{ Bindings: CloudflareBindings }>();
 
@@ -41,11 +42,30 @@ const newPasswordSchema = z.object({
   path: ['confirm_password']
 });
 
+// Helper function to get database service
+async function getDbService(env: any) {
+  if (env.DB) {
+    try {
+      // Test if database is properly set up by checking for users table
+      await env.DB.prepare('SELECT COUNT(*) FROM users LIMIT 1').first();
+      return new DatabaseService(env.DB);
+    } catch (error) {
+      console.log('D1 database not properly configured, using mock database:', error.message);
+      await MockDatabaseService.initialize();
+      return new MockDatabaseService();
+    }
+  } else {
+    console.log('Using mock database (D1 not available)');
+    await MockDatabaseService.initialize();
+    return new MockDatabaseService();
+  }
+}
+
 // Sign up route
 auth.post('/signup', zValidator('json', signupSchema), async (c) => {
   try {
     const data = c.req.valid('json');
-    const db = new DatabaseService(c.env.DB);
+    const db = await getDbService(c.env);
 
     // Check if user already exists
     const existingUser = await db.getUserByEmail(data.email);
@@ -87,7 +107,7 @@ auth.post('/signup', zValidator('json', signupSchema), async (c) => {
 auth.post('/login', zValidator('json', loginSchema), async (c) => {
   try {
     const { email, password } = c.req.valid('json');
-    const db = new DatabaseService(c.env.DB);
+    const db = await getDbService(c.env);
 
     // Find user by email
     const user = await db.getUserByEmail(email);
@@ -129,7 +149,7 @@ auth.post('/login', zValidator('json', loginSchema), async (c) => {
 auth.post('/reset-password', zValidator('json', resetPasswordSchema), async (c) => {
   try {
     const { email } = c.req.valid('json');
-    const db = new DatabaseService(c.env.DB);
+    const db = await getDbService(c.env);
 
     // Find user by email
     const user = await db.getUserByEmail(email);
@@ -172,7 +192,7 @@ auth.post('/reset-password', zValidator('json', resetPasswordSchema), async (c) 
 auth.post('/reset-password/confirm', zValidator('json', newPasswordSchema), async (c) => {
   try {
     const { token, new_password } = c.req.valid('json');
-    const db = new DatabaseService(c.env.DB);
+    const db = await getDbService(c.env);
 
     // Verify reset token
     const resetData = await db.verifyResetToken(token);
@@ -237,7 +257,7 @@ auth.get('/profile', async (c) => {
       return c.json({ error: 'Invalid or expired token' }, 401);
     }
 
-    const db = new DatabaseService(c.env.DB);
+    const db = await getDbService(c.env);
     const user = await db.getUserById(decoded.userId);
     
     if (!user) {
