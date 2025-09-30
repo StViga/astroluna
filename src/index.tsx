@@ -1076,17 +1076,66 @@ app.get('/tarotpath', (c) => {
               });
               
               if (response.data.success) {
-                document.getElementById('readingContent').innerHTML = 
-                  '<div class="whitespace-pre-wrap text-gray-100">' + response.data.content + '</div>';
+                const tarotReading = response.data.tarot_reading;
+                
+                // Create structured tarot reading display
+                let readingHTML = '<div class="space-y-6">';
+                readingHTML += '<div class="text-center mb-6">';
+                readingHTML += '<h2 class="text-2xl font-bold text-pink-400 mb-2">' + tarotReading.title + '</h2>';
+                readingHTML += '</div>';
+                
+                // Cards section
+                if (tarotReading.cards && tarotReading.cards.length > 0) {
+                  readingHTML += '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">';
+                  
+                  tarotReading.cards.forEach((card, index) => {
+                    const cardColors = [
+                      'border-purple-500/50 bg-purple-900/20',
+                      'border-pink-500/50 bg-pink-900/20', 
+                      'border-blue-500/50 bg-blue-900/20',
+                      'border-green-500/50 bg-green-900/20',
+                      'border-yellow-500/50 bg-yellow-900/20'
+                    ];
+                    
+                    const cardColor = cardColors[index % cardColors.length];
+                    
+                    readingHTML += '<div class="' + cardColor + ' border rounded-xl p-4">';
+                    readingHTML += '<div class="text-center mb-3">';
+                    readingHTML += '<div class="text-2xl mb-2">🃏</div>';
+                    readingHTML += '<h3 class="text-lg font-bold text-white mb-1">' + card.name + '</h3>';
+                    readingHTML += '<div class="text-sm text-gray-300 font-medium">' + card.position + '</div>';
+                    readingHTML += '</div>';
+                    readingHTML += '<div class="text-sm text-gray-200 leading-relaxed">';
+                    readingHTML += card.interpretation.substring(0, 300);
+                    if (card.interpretation.length > 300) readingHTML += '...';
+                    readingHTML += '</div>';
+                    readingHTML += '</div>';
+                  });
+                  
+                  readingHTML += '</div>';
+                }
+                
+                // Overall message section
+                if (tarotReading.overall) {
+                  readingHTML += '<div class="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-xl p-6">';
+                  readingHTML += '<h3 class="text-xl font-semibold text-purple-300 mb-4">';
+                  readingHTML += '<i class="fas fa-crystal-ball mr-2"></i>Overall Guidance</h3>';
+                  readingHTML += '<div class="text-gray-200 leading-relaxed">';
+                  readingHTML += tarotReading.overall.substring(0, 1000);
+                  if (tarotReading.overall.length > 1000) readingHTML += '...';
+                  readingHTML += '</div></div>';
+                }
+                
+                readingHTML += '</div>';
+                
+                document.getElementById('readingContent').innerHTML = readingHTML;
                 document.getElementById('results').classList.remove('hidden');
                 
                 // Update credits display
-                const creditsElement = document.getElementById('credits');
-                const currentCredits = parseInt(creditsElement.textContent);
-                creditsElement.textContent = currentCredits - 20;
+                document.getElementById('credits').textContent = response.data.remaining_credits || 0;
                 
                 // Setup save button
-                document.getElementById('saveReading').onclick = () => saveToLibrary(response.data.reading_id);
+                document.getElementById('saveReading').onclick = () => saveToLibrary(response.data.content_id);
               } else {
                 alert(response.data.error || 'Failed to generate tarot reading');
               }
@@ -1549,17 +1598,81 @@ app.get('/zodiac', (c) => {
               });
               
               if (response.data.success) {
-                document.getElementById('analysisContent').innerHTML = 
-                  '<div class="whitespace-pre-wrap text-gray-100">' + response.data.content + '</div>';
+                const zodiacAnalysis = response.data.zodiac_analysis;
+                
+                // Create structured zodiac analysis display
+                let analysisHTML = '<div class="space-y-6">';
+                analysisHTML += '<div class="text-center mb-6">';
+                analysisHTML += '<h2 class="text-2xl font-bold text-cyan-400 mb-2">' + zodiacAnalysis.title + '</h2>';
+                analysisHTML += '</div>';
+                
+                // Analysis content
+                if (zodiacAnalysis.insights) {
+                  const insights = zodiacAnalysis.insights;
+                  
+                  // Full analysis section (main content)
+                  if (insights.full_analysis) {
+                    analysisHTML += '<div class="bg-gradient-to-r from-cyan-900/30 to-blue-900/30 border border-cyan-500/30 rounded-xl p-6 mb-6">';
+                    analysisHTML += '<h3 class="text-xl font-semibold text-cyan-300 mb-4">';
+                    analysisHTML += '<i class="fas fa-star-of-david mr-2"></i>Cosmic Analysis</h3>';
+                    analysisHTML += '<div class="text-gray-200 leading-relaxed prose prose-invert max-w-none">';
+                    analysisHTML += insights.full_analysis.substring(0, 1500);
+                    if (insights.full_analysis.length > 1500) analysisHTML += '...';
+                    analysisHTML += '</div></div>';
+                  }
+                  
+                  // Individual sections if available
+                  const sections = [
+                    { key: 'love', title: 'Love & Relationships', icon: 'fas fa-heart', color: 'pink' },
+                    { key: 'career', title: 'Career & Success', icon: 'fas fa-briefcase', color: 'green' },
+                    { key: 'health', title: 'Health & Wellness', icon: 'fas fa-heart-pulse', color: 'blue' },
+                    { key: 'spiritual', title: 'Spiritual Growth', icon: 'fas fa-om', color: 'purple' }
+                  ];
+                  
+                  sections.forEach(section => {
+                    if (insights[section.key] && insights[section.key].trim()) {
+                      analysisHTML += '<div class="bg-' + section.color + '-900/20 border border-' + section.color + '-500/30 rounded-lg p-4">';
+                      analysisHTML += '<h3 class="text-lg font-semibold text-' + section.color + '-400 mb-3">';
+                      analysisHTML += '<i class="' + section.icon + ' mr-2"></i>' + section.title + '</h3>';
+                      analysisHTML += '<p class="text-gray-200 leading-relaxed">' + insights[section.key] + '</p>';
+                      analysisHTML += '</div>';
+                    }
+                  });
+                  
+                  // Strengths and Growth Areas
+                  if (insights.strengths && insights.strengths.length > 0) {
+                    analysisHTML += '<div class="bg-green-900/20 border border-green-500/30 rounded-lg p-4">';
+                    analysisHTML += '<h3 class="text-lg font-semibold text-green-400 mb-3">';
+                    analysisHTML += '<i class="fas fa-trophy mr-2"></i>Strengths</h3>';
+                    analysisHTML += '<ul class="list-disc list-inside text-gray-200 space-y-1">';
+                    insights.strengths.forEach(strength => {
+                      analysisHTML += '<li>' + strength + '</li>';
+                    });
+                    analysisHTML += '</ul></div>';
+                  }
+                  
+                  if (insights.growth_areas && insights.growth_areas.length > 0) {
+                    analysisHTML += '<div class="bg-orange-900/20 border border-orange-500/30 rounded-lg p-4">';
+                    analysisHTML += '<h3 class="text-lg font-semibold text-orange-400 mb-3">';
+                    analysisHTML += '<i class="fas fa-seedling mr-2"></i>Growth Areas</h3>';
+                    analysisHTML += '<ul class="list-disc list-inside text-gray-200 space-y-1">';
+                    insights.growth_areas.forEach(area => {
+                      analysisHTML += '<li>' + area + '</li>';
+                    });
+                    analysisHTML += '</ul></div>';
+                  }
+                }
+                
+                analysisHTML += '</div>';
+                
+                document.getElementById('analysisContent').innerHTML = analysisHTML;
                 document.getElementById('results').classList.remove('hidden');
                 
-                // Update credits display
-                const creditsElement = document.getElementById('credits');
-                const currentCredits = parseInt(creditsElement.textContent);
-                creditsElement.textContent = currentCredits - 10;
+                // Update credits display  
+                document.getElementById('credits').textContent = response.data.remaining_credits || 0;
                 
                 // Setup save button
-                document.getElementById('saveReading').onclick = () => saveToLibrary(response.data.reading_id);
+                document.getElementById('saveReading').onclick = () => saveToLibrary(response.data.content_id);
               } else {
                 alert(response.data.error || 'Failed to generate zodiac analysis');
               }
