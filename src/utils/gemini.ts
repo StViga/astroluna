@@ -28,7 +28,7 @@ export interface GeminiResponse {
 }
 
 export class GeminiService {
-  private static GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
+  private static GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1';
   
   /**
    * Generate content using Gemini API
@@ -55,7 +55,7 @@ export class GeminiService {
       };
 
       const response = await fetch(
-        `${this.GEMINI_API_BASE}/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        `${this.GEMINI_API_BASE}/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: {
