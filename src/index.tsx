@@ -673,17 +673,77 @@ app.get('/astroscope', (c) => {
               });
               
               if (response.data.success) {
-                document.getElementById('horoscopeContent').innerHTML = 
-                  '<div class="whitespace-pre-wrap text-gray-100">' + response.data.content + '</div>';
+                const horoscope = response.data.horoscope;
+                
+                // Create structured horoscope display
+                let horoscopeHTML = '<div class="space-y-6">';
+                horoscopeHTML += '<div class="text-center mb-6">';
+                horoscopeHTML += '<h2 class="text-2xl font-bold text-purple-400 mb-2">' + horoscope.title + '</h2>';
+                horoscopeHTML += '</div>';
+                
+                // Love & Relationships section
+                if (horoscope.content.love) {
+                  horoscopeHTML += '<div class="bg-pink-900/20 border border-pink-500/30 rounded-lg p-4">';
+                  horoscopeHTML += '<h3 class="text-xl font-semibold text-pink-400 mb-3">';
+                  horoscopeHTML += '<i class="fas fa-heart mr-2"></i>Love & Relationships</h3>';
+                  horoscopeHTML += '<p class="text-gray-200 leading-relaxed">' + horoscope.content.love + '</p>';
+                  horoscopeHTML += '</div>';
+                }
+                
+                // Career & Finance section  
+                if (horoscope.content.career) {
+                  horoscopeHTML += '<div class="bg-green-900/20 border border-green-500/30 rounded-lg p-4">';
+                  horoscopeHTML += '<h3 class="text-xl font-semibold text-green-400 mb-3">';
+                  horoscopeHTML += '<i class="fas fa-briefcase mr-2"></i>Career & Finance</h3>';
+                  horoscopeHTML += '<p class="text-gray-200 leading-relaxed">' + horoscope.content.career + '</p>';
+                  horoscopeHTML += '</div>';
+                }
+                
+                // Health & Energy section
+                if (horoscope.content.health) {
+                  horoscopeHTML += '<div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">';
+                  horoscopeHTML += '<h3 class="text-xl font-semibold text-blue-400 mb-3">';
+                  horoscopeHTML += '<i class="fas fa-heart-pulse mr-2"></i>Health & Energy</h3>';
+                  horoscopeHTML += '<p class="text-gray-200 leading-relaxed">' + horoscope.content.health + '</p>';
+                  horoscopeHTML += '</div>';
+                }
+                
+                // Personal Growth section
+                if (horoscope.content.personal) {
+                  horoscopeHTML += '<div class="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4">';
+                  horoscopeHTML += '<h3 class="text-xl font-semibold text-purple-400 mb-3">';
+                  horoscopeHTML += '<i class="fas fa-star mr-2"></i>Personal Growth</h3>';
+                  horoscopeHTML += '<p class="text-gray-200 leading-relaxed">' + horoscope.content.personal + '</p>';
+                  horoscopeHTML += '</div>';
+                }
+                
+                // Key Dates section
+                if (horoscope.content.keyDates && horoscope.content.keyDates.length > 0) {
+                  horoscopeHTML += '<div class="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4">';
+                  horoscopeHTML += '<h3 class="text-xl font-semibold text-yellow-400 mb-3">';
+                  horoscopeHTML += '<i class="fas fa-calendar-alt mr-2"></i>Key Dates</h3>';
+                  horoscopeHTML += '<div class="grid grid-cols-1 md:grid-cols-2 gap-3">';
+                  
+                  horoscope.content.keyDates.forEach(date => {
+                    horoscopeHTML += '<div class="bg-gray-800/50 rounded-lg p-3">';
+                    horoscopeHTML += '<div class="font-semibold text-yellow-300">' + date.date + '</div>';
+                    horoscopeHTML += '<div class="text-sm text-gray-300">' + date.description + '</div>';
+                    horoscopeHTML += '</div>';
+                  });
+                  
+                  horoscopeHTML += '</div></div>';
+                }
+                
+                horoscopeHTML += '</div>';
+                
+                document.getElementById('horoscopeContent').innerHTML = horoscopeHTML;
                 document.getElementById('results').classList.remove('hidden');
                 
                 // Update credits display
-                const creditsElement = document.getElementById('credits');
-                const currentCredits = parseInt(creditsElement.textContent);
-                creditsElement.textContent = currentCredits - 15;
+                document.getElementById('credits').textContent = response.data.remaining_credits || 0;
                 
                 // Setup save button
-                document.getElementById('saveReading').onclick = () => saveToLibrary(response.data.reading_id);
+                document.getElementById('saveReading').onclick = () => saveToLibrary(response.data.content_id);
               } else {
                 alert(response.data.error || 'Failed to generate horoscope');
               }

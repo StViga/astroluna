@@ -283,22 +283,66 @@ Write with depth and nuance, going beyond typical zodiac descriptions to provide
    * Parse horoscope content into structured format
    */
   private static parseHoroscopeContent(content: string, zodiacSign?: string, month?: string) {
-    // This is a simplified parser - in production, you might want more sophisticated parsing
     const title = `Monthly Horoscope${zodiacSign ? ` for ${zodiacSign}` : ''} - ${month}`;
     
-    // Extract sections using simple text parsing
-    const sections = content.split(/(?:LOVE|CAREER|HEALTH|PERSONAL|KEY DATES?)/i);
+    // Enhanced parsing to extract content sections more reliably
+    let love = '';
+    let career = '';
+    let health = '';
+    let personal = '';
+    
+    // Try multiple parsing approaches
+    // Approach 1: Look for numbered sections
+    const numberedMatches = content.match(/(\d+\.\s*[^:]+:\s*[^1-9]+?)(?=\d+\.|$)/g);
+    if (numberedMatches && numberedMatches.length >= 4) {
+      love = this.cleanSectionText(numberedMatches[0]);
+      career = this.cleanSectionText(numberedMatches[1]);
+      health = this.cleanSectionText(numberedMatches[2]);
+      personal = this.cleanSectionText(numberedMatches[3]);
+    } else {
+      // Approach 2: Look for section headers
+      const loveMatch = content.match(/(?:LOVE|RELATIONSHIPS?)[\s&:]*([^]*?)(?=(?:CAREER|FINANCE|HEALTH|PERSONAL|$))/i);
+      const careerMatch = content.match(/(?:CAREER|FINANCE)[\s&:]*([^]*?)(?=(?:HEALTH|PERSONAL|LOVE|$))/i);
+      const healthMatch = content.match(/(?:HEALTH|ENERGY|WELLNESS)[\s&:]*([^]*?)(?=(?:PERSONAL|CAREER|LOVE|$))/i);
+      const personalMatch = content.match(/(?:PERSONAL|GROWTH|SPIRITUAL)[\s&:]*([^]*?)(?=(?:KEY DATES?|CAREER|LOVE|HEALTH|$))/i);
+      
+      love = this.cleanSectionText(loveMatch?.[1]) || 'Love energies are flowing positively this month.';
+      career = this.cleanSectionText(careerMatch?.[1]) || 'Professional opportunities await your attention.';
+      health = this.cleanSectionText(healthMatch?.[1]) || 'Focus on maintaining balance in all areas of life.';
+      personal = this.cleanSectionText(personalMatch?.[1]) || 'Personal growth opportunities are highlighted.';
+    }
+    
+    // If all sections are empty, use the full content as personal insight
+    if (!love && !career && !health && !personal) {
+      personal = this.cleanSectionText(content);
+    }
     
     return {
       title,
       content: {
-        love: sections[1]?.trim() || 'Love energies are flowing positively this month.',
-        career: sections[2]?.trim() || 'Professional opportunities await your attention.',
-        health: sections[3]?.trim() || 'Focus on maintaining balance in all areas of life.',
-        personal: sections[4]?.trim() || 'Personal growth opportunities are highlighted.',
+        love: love || 'Love energies are flowing positively this month.',
+        career: career || 'Professional opportunities await your attention.',
+        health: health || 'Focus on maintaining balance in all areas of life.',
+        personal: personal || 'Personal growth opportunities are highlighted.',
         keyDates: this.extractKeyDates(content)
       }
     };
+  }
+
+  /**
+   * Clean and format section text
+   */
+  private static cleanSectionText(text?: string): string {
+    if (!text) return '';
+    
+    return text
+      .trim()
+      .replace(/^\d+\.\s*[^:]+:\s*/, '') // Remove "1. LOVE & RELATIONSHIPS:" type headers
+      .replace(/\*\*/g, '') // Remove markdown bold markers
+      .replace(/^\s*[-*]\s*/gm, '') // Remove bullet points
+      .replace(/\n\s*\n/g, '\n\n') // Normalize paragraph breaks
+      .substring(0, 500) // Limit length to prevent overflow
+      .trim();
   }
 
   /**
@@ -366,15 +410,38 @@ Write with depth and nuance, going beyond typical zodiac descriptions to provide
   // Helper methods for parsing
   private static extractKeyDates(content: string) {
     const dates = [];
-    const dateMatches = content.match(/(\d{1,2}(?:st|nd|rd|th)?)\s*(?:of\s*)?(\w+)/g);
     
-    if (dateMatches) {
-      for (let i = 0; i < Math.min(dateMatches.length, 4); i++) {
-        dates.push({
-          date: dateMatches[i],
-          description: 'A day of special significance and opportunity.'
-        });
+    // Try to find date patterns in the content
+    const patterns = [
+      /(\d{1,2}(?:st|nd|rd|th)?)\s*(?:of\s*)?(\w+)/g,
+      /(\d{1,2})(?:[-\/])(\d{1,2})/g,
+      /(\w+)\s*(\d{1,2}(?:st|nd|rd|th)?)/g
+    ];
+    
+    for (const pattern of patterns) {
+      const matches = [...content.matchAll(pattern)];
+      if (matches.length > 0) {
+        for (let i = 0; i < Math.min(matches.length, 4); i++) {
+          dates.push({
+            date: matches[i][0],
+            description: 'A day of special significance and opportunity.'
+          });
+        }
+        break;
       }
+    }
+    
+    // If no dates found, generate some generic ones for the current month
+    if (dates.length === 0) {
+      const currentYear = new Date().getFullYear();
+      const currentMonth = new Date().getMonth() + 1;
+      
+      dates.push(
+        { date: `${currentYear}-${String(currentMonth).padStart(2, '0')}-05`, description: 'A day for new beginnings and fresh energy.' },
+        { date: `${currentYear}-${String(currentMonth).padStart(2, '0')}-12`, description: 'A powerful day for manifestation and goal setting.' },
+        { date: `${currentYear}-${String(currentMonth).padStart(2, '0')}-18`, description: 'Ideal time for important conversations and connections.' },
+        { date: `${currentYear}-${String(currentMonth).padStart(2, '0')}-25`, description: 'A harmonious day for creativity and inspiration.' }
+      );
     }
     
     return dates;
