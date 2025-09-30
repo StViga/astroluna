@@ -273,6 +273,7 @@ app.get('/checkout', (c) => {
 // Checkout success page
 app.get('/checkout/success', (c) => {
   const transactionId = c.req.query('transaction_id') || 'unknown';
+  const isDemo = c.req.query('demo') === 'true';
   
   return c.render(
     <html lang="en">
@@ -289,8 +290,20 @@ app.get('/checkout/success', (c) => {
             <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <i className="fas fa-check text-3xl text-white"></i>
             </div>
-            <h1 className="text-3xl font-bold mb-2">Payment Successful!</h1>
-            <p className="text-gray-300">Your credits have been added to your account</p>
+            <h1 className="text-3xl font-bold mb-2">
+              {isDemo ? 'Demo Payment Completed!' : 'Payment Successful!'}
+            </h1>
+            <p className="text-gray-300">
+              {isDemo ? 'Demo credits have been simulated' : 'Your credits have been added to your account'}
+            </p>
+            {isDemo && (
+              <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-3 mt-3">
+                <p className="text-yellow-300 text-sm">
+                  <i className="fas fa-info-circle mr-2"></i>
+                  This was a demo transaction - no real payment was processed
+                </p>
+              </div>
+            )}
           </div>
           
           <div className="bg-black/20 backdrop-blur-md p-6 rounded-xl border border-green-500/30 mb-6">
@@ -565,7 +578,7 @@ app.get('/astroscope', (c) => {
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script>{`
+        <script dangerouslySetInnerHTML={{__html: `
           document.addEventListener('DOMContentLoaded', function() {
             loadUserProfile();
             
@@ -676,7 +689,11 @@ app.get('/astroscope', (c) => {
               }
             } catch (error) {
               console.error('Generation error:', error);
-              alert((error.response && error.response.data && error.response.data.error) || 'Failed to generate horoscope');
+              let message = 'Failed to generate horoscope';
+              if (error.response && error.response.data && error.response.data.error) {
+                message = error.response.data.error;
+              }
+              alert(message);
             } finally {
               document.getElementById('loading').classList.add('hidden');
             }
@@ -701,7 +718,7 @@ app.get('/astroscope', (c) => {
               alert('Failed to save reading');
             }
           }
-        `}</script>
+        `}} />
       </body>
     </html>
   )
@@ -883,7 +900,7 @@ app.get('/tarotpath', (c) => {
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script>{`
+        <script dangerouslySetInnerHTML={{__html: `
           let selectedCardIds = [];
           let readingData = {};
           
@@ -1015,7 +1032,11 @@ app.get('/tarotpath', (c) => {
               }
             } catch (error) {
               console.error('Generation error:', error);
-              alert((error.response && error.response.data && error.response.data.error) || 'Failed to generate tarot reading');
+              let message = 'Failed to generate tarot reading';
+              if (error.response && error.response.data && error.response.data.error) {
+                message = error.response.data.error;
+              }
+              alert(message);
             } finally {
               document.getElementById('loading').classList.add('hidden');
             }
@@ -1040,7 +1061,7 @@ app.get('/tarotpath', (c) => {
               alert('Failed to save reading');
             }
           }
-        `}</script>
+        `}} />
       </body>
     </html>
   )
@@ -1307,7 +1328,7 @@ app.get('/zodiac', (c) => {
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script>{`
+        <script dangerouslySetInnerHTML={{__html: `
           let selectedFirstSign = null;
           let selectedSecondSign = null;
           let selectedInsightSign = null;
@@ -1484,7 +1505,11 @@ app.get('/zodiac', (c) => {
               }
             } catch (error) {
               console.error('Generation error:', error);
-              alert((error.response && error.response.data && error.response.data.error) || 'Failed to generate zodiac analysis');
+              let message = 'Failed to generate zodiac analysis';
+              if (error.response && error.response.data && error.response.data.error) {
+                message = error.response.data.error;
+              }
+              alert(message);
             } finally {
               document.getElementById('loading').classList.add('hidden');
             }
@@ -1509,7 +1534,7 @@ app.get('/zodiac', (c) => {
               alert('Failed to save analysis');
             }
           }
-        `}</script>
+        `}} />
       </body>
     </html>
   )
@@ -1666,7 +1691,7 @@ app.get('/dashboard', (c) => {
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script>{`
+        <script dangerouslySetInnerHTML={{__html: `
           document.addEventListener('DOMContentLoaded', function() {
             loadDashboard();
             
@@ -1738,7 +1763,7 @@ app.get('/dashboard', (c) => {
               console.error('Failed to load recent readings:', error);
             }
           }
-        `}</script>
+        `}} />
       </body>
     </html>
   )
@@ -1981,6 +2006,66 @@ app.get('/signup', (c) => {
     </html>
   )
 })
+
+// Test checkout page (for development)
+app.get('/test-checkout', (c) => {
+  return c.html(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Test Checkout</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="p-8 bg-gray-900 text-white">
+        <h1 class="text-2xl mb-4">Test Checkout Process</h1>
+        <div class="space-x-4 mb-4">
+            <button onclick="testLogin()" class="bg-blue-600 px-4 py-2 rounded">1. Login</button>
+            <button onclick="testCheckout()" class="bg-green-600 px-4 py-2 rounded">2. Open Checkout</button>
+        </div>
+        <div id="result" class="bg-gray-800 p-4 rounded"></div>
+
+        <script>
+            let authToken = null;
+            
+            async function testLogin() {
+                try {
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: 'test@example.com',
+                            password: 'testpass'
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        authToken = data.token;
+                        localStorage.setItem('auth_token', authToken);
+                        document.getElementById('result').innerHTML = '<p class="text-green-400">✅ Login successful! Token saved. Credits: ' + data.credits + '</p>';
+                    } else {
+                        document.getElementById('result').innerHTML = '<p class="text-red-400">❌ Login failed: ' + data.error + '</p>';
+                    }
+                } catch (error) {
+                    document.getElementById('result').innerHTML = '<p class="text-red-400">❌ Login error: ' + error.message + '</p>';
+                }
+            }
+            
+            async function testCheckout() {
+                const token = localStorage.getItem('auth_token');
+                if (!token) {
+                    document.getElementById('result').innerHTML = '<p class="text-yellow-400">❌ Please login first</p>';
+                    return;
+                }
+                
+                // Open checkout page
+                window.location.href = '/checkout';
+            }
+        </script>
+    </body>
+    </html>
+  `);
+});
 
 // 404 handler
 app.notFound((c) => {

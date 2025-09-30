@@ -217,7 +217,7 @@ export function CheckoutPage() {
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script>{`
+        <script dangerouslySetInnerHTML={{__html: `
           // Checkout logic will be added here
           let selectedPackage = null;
           let exchangeRates = null;
@@ -445,12 +445,17 @@ export function CheckoutPage() {
               
             } catch (error) {
               console.error('Payment processing error:', error);
-              const message = error.response?.data?.error || error.message || 'Payment processing failed';
+              let message = 'Payment processing failed';
+              if (error.response && error.response.data && error.response.data.error) {
+                message = error.response.data.error;
+              } else if (error.message) {
+                message = error.message;
+              }
               alert(\`Payment Error: \${message}\`);
               goToStep(2);
             }
           }
-        `}</script>
+        `}} />
       </body>
     </html>
   );

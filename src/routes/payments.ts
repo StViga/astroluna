@@ -90,13 +90,40 @@ payments.post('/checkout/init', authMiddleware, zValidator('json', checkoutInitS
       zip_code: data.zip_code
     };
 
-    // Create payment with SPC
-    const paymentResult = await SPCPaymentService.createPaymentWidget(paymentRequest, {
-      SPC_TERMINAL_ID: c.env.SPC_TERMINAL_ID,
-      SPC_PUB_KEY: c.env.SPC_PUB_KEY,
-      SPC_SEC_KEY: c.env.SPC_SEC_KEY,
-      BASE_URL: c.env.BASE_URL || 'http://localhost:3000'
+    // Check if SPC credentials are configured
+    const hasSPCCredentials = c.env.SPC_TERMINAL_ID && c.env.SPC_PUB_KEY && c.env.SPC_SEC_KEY;
+    
+    console.log('SPC Credentials check:', {
+      hasSPCCredentials,
+      hasTerminal: !!c.env.SPC_TERMINAL_ID,
+      hasPubKey: !!c.env.SPC_PUB_KEY,
+      hasSecKey: !!c.env.SPC_SEC_KEY
     });
+    
+    let paymentResult;
+    
+    if (hasSPCCredentials) {
+      // Use real SPC payment gateway
+      paymentResult = await SPCPaymentService.createPaymentWidget(paymentRequest, {
+        SPC_TERMINAL_ID: c.env.SPC_TERMINAL_ID,
+        SPC_PUB_KEY: c.env.SPC_PUB_KEY,
+        SPC_SEC_KEY: c.env.SPC_SEC_KEY,
+        BASE_URL: c.env.BASE_URL || 'http://localhost:3000'
+      });
+    } else {
+      // Demo mode - simulate successful payment for development
+      console.log('Using demo payment mode (SPC credentials not configured)');
+      
+      paymentResult = {
+        success: true,
+        transaction_id: `demo_${Date.now()}`,
+        payment_url: `/checkout/demo-payment?tx=${transaction.tx_id}&amount=${targetCurrencyAmount}&currency=${data.currency}`,
+        widget_config: {
+          demo: true,
+          message: 'Demo mode - no real payment will be processed'
+        }
+      };
+    }
 
     if (!paymentResult.success) {
       // Update transaction status to failed
@@ -114,7 +141,8 @@ payments.post('/checkout/init', authMiddleware, zValidator('json', checkoutInitS
       'pending', 
       JSON.stringify({
         gateway_transaction_id: paymentResult.transaction_id,
-        payment_url: paymentResult.payment_url
+        payment_url: paymentResult.payment_url,
+        demo_mode: !hasSPCCredentials
       })
     );
 
@@ -386,6 +414,95 @@ payments.get('/test-connection', async (c) => {
       }
     });
   }
+});
+
+// Demo payment page (when SPC credentials not configured)
+payments.get('/checkout/demo-payment', async (c) => {
+  const txId = c.req.query('tx');
+  const amount = c.req.query('amount');
+  const currency = c.req.query('currency');
+  
+  if (!txId || !amount || !currency) {
+    return c.json({ error: 'Missing payment parameters' }, 400);
+  }
+
+  return c.html(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Demo Payment - AstroLuna</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+        <style>
+          body { 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+          }
+        </style>
+    </head>
+    <body class="text-white flex items-center justify-center min-h-screen">
+        <div class="max-w-md mx-auto p-8">
+            <div class="bg-gray-800/30 backdrop-blur-sm border border-purple-500/30 rounded-xl p-8 text-center">
+                <div class="text-6xl text-yellow-400 mb-6">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                
+                <h1 class="text-2xl font-bold mb-4">Demo Payment Simulation</h1>
+                
+                <div class="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 mb-6">
+                    <p class="text-yellow-300 text-sm">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        This is a demo environment. No real payment will be processed.
+                    </p>
+                </div>
+                
+                <div class="space-y-3 mb-6 text-left">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Transaction ID:</span>
+                        <span class="font-mono text-sm">${txId}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Amount:</span>
+                        <span class="font-bold">${amount} ${currency}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Status:</span>
+                        <span class="text-yellow-400">Pending</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <button onclick="simulateSuccess()" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 py-3 px-4 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                        <i class="fas fa-check mr-2"></i>Simulate Successful Payment
+                    </button>
+                    
+                    <button onclick="simulateFailure()" class="w-full bg-gradient-to-r from-red-600 to-pink-600 py-3 px-4 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                        <i class="fas fa-times mr-2"></i>Simulate Failed Payment
+                    </button>
+                    
+                    <a href="/checkout" class="block w-full border border-gray-600 py-3 px-4 rounded-lg font-semibold hover:bg-gray-600/20 transition-colors text-center">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Checkout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function simulateSuccess() {
+                // Simulate successful payment - redirect to success page
+                window.location.href = '/checkout/success?transaction_id=${txId}&demo=true';
+            }
+            
+            function simulateFailure() {
+                // Simulate failed payment - redirect to cancel page  
+                window.location.href = '/checkout/cancel?transaction_id=${txId}&demo=true&reason=demo_failure';
+            }
+        </script>
+    </body>
+    </html>
+  `);
 });
 
 export default payments;

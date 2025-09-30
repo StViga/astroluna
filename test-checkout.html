@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Checkout</title>
+</head>
+<body>
+    <h1>Test Checkout Process</h1>
+    <button onclick="testLogin()">1. Login</button>
+    <button onclick="testCheckout()">2. Open Checkout</button>
+    <div id="result"></div>
+
+    <script>
+        let authToken = null;
+        
+        async function testLogin() {
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'testpass'
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    authToken = data.token;
+                    localStorage.setItem('auth_token', authToken);
+                    document.getElementById('result').innerHTML = '<p>✅ Login successful! Token saved.</p>';
+                } else {
+                    document.getElementById('result').innerHTML = '<p>❌ Login failed: ' + data.error + '</p>';
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = '<p>❌ Login error: ' + error.message + '</p>';
+            }
+        }
+        
+        async function testCheckout() {
+            if (!authToken) {
+                document.getElementById('result').innerHTML = '<p>❌ Please login first</p>';
+                return;
+            }
+            
+            // Open checkout page
+            window.location.href = '/checkout';
+        }
+    </script>
+</body>
+</html>
