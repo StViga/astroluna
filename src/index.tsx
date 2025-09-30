@@ -683,52 +683,60 @@ app.get('/astroscope', (c) => {
                 
                 // Love & Relationships section
                 if (horoscope.content.love) {
+                  const loveContent = typeof horoscope.content.love === 'string' ? horoscope.content.love : 'Love energies are flowing positively this month.';
                   horoscopeHTML += '<div class="bg-pink-900/20 border border-pink-500/30 rounded-lg p-4">';
                   horoscopeHTML += '<h3 class="text-xl font-semibold text-pink-400 mb-3">';
                   horoscopeHTML += '<i class="fas fa-heart mr-2"></i>Love & Relationships</h3>';
-                  horoscopeHTML += '<p class="text-gray-200 leading-relaxed">' + horoscope.content.love + '</p>';
+                  horoscopeHTML += '<p class="text-gray-200 leading-relaxed">' + loveContent + '</p>';
                   horoscopeHTML += '</div>';
                 }
                 
                 // Career & Finance section  
                 if (horoscope.content.career) {
+                  const careerContent = typeof horoscope.content.career === 'string' ? horoscope.content.career : 'Professional opportunities await your attention.';
                   horoscopeHTML += '<div class="bg-green-900/20 border border-green-500/30 rounded-lg p-4">';
                   horoscopeHTML += '<h3 class="text-xl font-semibold text-green-400 mb-3">';
                   horoscopeHTML += '<i class="fas fa-briefcase mr-2"></i>Career & Finance</h3>';
-                  horoscopeHTML += '<p class="text-gray-200 leading-relaxed">' + horoscope.content.career + '</p>';
+                  horoscopeHTML += '<p class="text-gray-200 leading-relaxed">' + careerContent + '</p>';
                   horoscopeHTML += '</div>';
                 }
                 
                 // Health & Energy section
                 if (horoscope.content.health) {
+                  const healthContent = typeof horoscope.content.health === 'string' ? horoscope.content.health : 'Focus on maintaining balance in all areas of life.';
                   horoscopeHTML += '<div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">';
                   horoscopeHTML += '<h3 class="text-xl font-semibold text-blue-400 mb-3">';
                   horoscopeHTML += '<i class="fas fa-heart-pulse mr-2"></i>Health & Energy</h3>';
-                  horoscopeHTML += '<p class="text-gray-200 leading-relaxed">' + horoscope.content.health + '</p>';
+                  horoscopeHTML += '<p class="text-gray-200 leading-relaxed">' + healthContent + '</p>';
                   horoscopeHTML += '</div>';
                 }
                 
                 // Personal Growth section
                 if (horoscope.content.personal) {
+                  const personalContent = typeof horoscope.content.personal === 'string' ? horoscope.content.personal : 'Personal growth opportunities are highlighted.';
                   horoscopeHTML += '<div class="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4">';
                   horoscopeHTML += '<h3 class="text-xl font-semibold text-purple-400 mb-3">';
                   horoscopeHTML += '<i class="fas fa-star mr-2"></i>Personal Growth</h3>';
-                  horoscopeHTML += '<p class="text-gray-200 leading-relaxed">' + horoscope.content.personal + '</p>';
+                  horoscopeHTML += '<p class="text-gray-200 leading-relaxed">' + personalContent + '</p>';
                   horoscopeHTML += '</div>';
                 }
                 
                 // Key Dates section
-                if (horoscope.content.keyDates && horoscope.content.keyDates.length > 0) {
+                if (horoscope.content.keyDates && Array.isArray(horoscope.content.keyDates) && horoscope.content.keyDates.length > 0) {
                   horoscopeHTML += '<div class="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4">';
                   horoscopeHTML += '<h3 class="text-xl font-semibold text-yellow-400 mb-3">';
                   horoscopeHTML += '<i class="fas fa-calendar-alt mr-2"></i>Key Dates</h3>';
                   horoscopeHTML += '<div class="grid grid-cols-1 md:grid-cols-2 gap-3">';
                   
                   horoscope.content.keyDates.forEach(date => {
-                    horoscopeHTML += '<div class="bg-gray-800/50 rounded-lg p-3">';
-                    horoscopeHTML += '<div class="font-semibold text-yellow-300">' + date.date + '</div>';
-                    horoscopeHTML += '<div class="text-sm text-gray-300">' + date.description + '</div>';
-                    horoscopeHTML += '</div>';
+                    if (date && typeof date === 'object') {
+                      const dateText = typeof date.date === 'string' ? date.date : 'Important Date';
+                      const descText = typeof date.description === 'string' ? date.description : 'A day of special significance.';
+                      horoscopeHTML += '<div class="bg-gray-800/50 rounded-lg p-3">';
+                      horoscopeHTML += '<div class="font-semibold text-yellow-300">' + dateText + '</div>';
+                      horoscopeHTML += '<div class="text-sm text-gray-300">' + descText + '</div>';
+                      horoscopeHTML += '</div>';
+                    }
                   });
                   
                   horoscopeHTML += '</div></div>';
@@ -1089,34 +1097,39 @@ app.get('/tarotpath', (c) => {
                   readingHTML += '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">';
                   
                   tarotReading.cards.forEach((card, index) => {
-                    const cardColors = [
-                      'border-purple-500/50 bg-purple-900/20',
-                      'border-pink-500/50 bg-pink-900/20', 
-                      'border-blue-500/50 bg-blue-900/20',
-                      'border-green-500/50 bg-green-900/20',
-                      'border-yellow-500/50 bg-yellow-900/20'
-                    ];
-                    
-                    const cardColor = cardColors[index % cardColors.length];
-                    
-                    readingHTML += '<div class="' + cardColor + ' border rounded-xl p-4">';
-                    readingHTML += '<div class="text-center mb-3">';
-                    readingHTML += '<div class="text-2xl mb-2">🃏</div>';
-                    readingHTML += '<h3 class="text-lg font-bold text-white mb-1">' + card.name + '</h3>';
-                    readingHTML += '<div class="text-sm text-gray-300 font-medium">' + card.position + '</div>';
-                    readingHTML += '</div>';
-                    readingHTML += '<div class="text-sm text-gray-200 leading-relaxed">';
-                    readingHTML += card.interpretation.substring(0, 300);
-                    if (card.interpretation.length > 300) readingHTML += '...';
-                    readingHTML += '</div>';
-                    readingHTML += '</div>';
+                    if (card && typeof card === 'object') {
+                      const cardColors = [
+                        'border-purple-500/50 bg-purple-900/20',
+                        'border-pink-500/50 bg-pink-900/20', 
+                        'border-blue-500/50 bg-blue-900/20',
+                        'border-green-500/50 bg-green-900/20',
+                        'border-yellow-500/50 bg-yellow-900/20'
+                      ];
+                      
+                      const cardColor = cardColors[index % cardColors.length];
+                      const cardName = typeof card.name === 'string' ? card.name : 'Tarot Card';
+                      const cardPosition = typeof card.position === 'string' ? card.position : 'Position';
+                      const cardInterpretation = typeof card.interpretation === 'string' ? card.interpretation : 'Card interpretation available.';
+                      
+                      readingHTML += '<div class="' + cardColor + ' border rounded-xl p-4">';
+                      readingHTML += '<div class="text-center mb-3">';
+                      readingHTML += '<div class="text-2xl mb-2">🃏</div>';
+                      readingHTML += '<h3 class="text-lg font-bold text-white mb-1">' + cardName + '</h3>';
+                      readingHTML += '<div class="text-sm text-gray-300 font-medium">' + cardPosition + '</div>';
+                      readingHTML += '</div>';
+                      readingHTML += '<div class="text-sm text-gray-200 leading-relaxed">';
+                      readingHTML += cardInterpretation.substring(0, 300);
+                      if (cardInterpretation.length > 300) readingHTML += '...';
+                      readingHTML += '</div>';
+                      readingHTML += '</div>';
+                    }
                   });
                   
                   readingHTML += '</div>';
                 }
                 
                 // Overall message section
-                if (tarotReading.overall) {
+                if (tarotReading.overall && typeof tarotReading.overall === 'string') {
                   readingHTML += '<div class="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-xl p-6">';
                   readingHTML += '<h3 class="text-xl font-semibold text-purple-300 mb-4">';
                   readingHTML += '<i class="fas fa-crystal-ball mr-2"></i>Overall Guidance</h3>';
