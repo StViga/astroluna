@@ -1086,69 +1086,114 @@ app.get('/tarotpath', (c) => {
               if (response.data.success) {
                 const tarotReading = response.data.tarot_reading;
                 
-                // Create structured tarot reading display
+                // Create structured tarot reading display  
                 let readingHTML = '<div class="space-y-6">';
+                
+                // Title section with safe handling
                 readingHTML += '<div class="text-center mb-6">';
-                readingHTML += '<h2 class="text-2xl font-bold text-pink-400 mb-2">' + tarotReading.title + '</h2>';
+                const title = (tarotReading && tarotReading.title) ? String(tarotReading.title) : 'Your Tarot Reading';
+                readingHTML += '<h2 class="text-2xl font-bold text-pink-400 mb-2">' + title + '</h2>';
                 readingHTML += '</div>';
                 
-                // Cards section
-                if (tarotReading.cards && tarotReading.cards.length > 0) {
+                // Cards section with enhanced safety
+                if (tarotReading && tarotReading.cards && Array.isArray(tarotReading.cards)) {
                   readingHTML += '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">';
                   
-                  tarotReading.cards.forEach((card, index) => {
-                    if (card && typeof card === 'object') {
-                      const cardColors = [
-                        'border-purple-500/50 bg-purple-900/20',
-                        'border-pink-500/50 bg-pink-900/20', 
-                        'border-blue-500/50 bg-blue-900/20',
-                        'border-green-500/50 bg-green-900/20',
-                        'border-yellow-500/50 bg-yellow-900/20'
-                      ];
-                      
-                      const cardColor = cardColors[index % cardColors.length];
-                      const cardName = typeof card.name === 'string' ? card.name : 'Tarot Card';
-                      const cardPosition = typeof card.position === 'string' ? card.position : 'Position';
-                      const cardInterpretation = typeof card.interpretation === 'string' ? card.interpretation : 'Card interpretation available.';
-                      
-                      readingHTML += '<div class="' + cardColor + ' border rounded-xl p-4">';
-                      readingHTML += '<div class="text-center mb-3">';
-                      readingHTML += '<div class="text-2xl mb-2">🃏</div>';
-                      readingHTML += '<h3 class="text-lg font-bold text-white mb-1">' + cardName + '</h3>';
-                      readingHTML += '<div class="text-sm text-gray-300 font-medium">' + cardPosition + '</div>';
-                      readingHTML += '</div>';
-                      readingHTML += '<div class="text-sm text-gray-200 leading-relaxed">';
-                      readingHTML += cardInterpretation.substring(0, 300);
-                      if (cardInterpretation.length > 300) readingHTML += '...';
-                      readingHTML += '</div>';
-                      readingHTML += '</div>';
+                  for (let i = 0; i < tarotReading.cards.length && i < 5; i++) {
+                    const card = tarotReading.cards[i];
+                    if (!card || typeof card !== 'object') continue;
+                    
+                    const cardColors = [
+                      'border-purple-500/50 bg-purple-900/20',
+                      'border-pink-500/50 bg-pink-900/20', 
+                      'border-blue-500/50 bg-blue-900/20',
+                      'border-green-500/50 bg-green-900/20',
+                      'border-yellow-500/50 bg-yellow-900/20'
+                    ];
+                    
+                    const cardColor = cardColors[i % cardColors.length];
+                    
+                    // Ultra-safe property extraction
+                    let cardName = 'Tarot Card';
+                    let cardPosition = 'Position ' + (i + 1);
+                    let cardInterpretation = 'Card interpretation available.';
+                    
+                    try {
+                      if (card.name) cardName = String(card.name);
+                      if (card.position) cardPosition = String(card.position);  
+                      if (card.interpretation) cardInterpretation = String(card.interpretation);
+                    } catch (e) {
+                      // Fallback values already set
                     }
-                  });
+                    
+                    readingHTML += '<div class="' + cardColor + ' border rounded-xl p-4">';
+                    readingHTML += '<div class="text-center mb-3">';
+                    readingHTML += '<div class="text-2xl mb-2">🃏</div>';
+                    readingHTML += '<h3 class="text-lg font-bold text-white mb-1">' + cardName + '</h3>';
+                    readingHTML += '<div class="text-sm text-gray-300 font-medium">' + cardPosition + '</div>';
+                    readingHTML += '</div>';
+                    readingHTML += '<div class="text-sm text-gray-200 leading-relaxed">';
+                    
+                    // Safe interpretation display
+                    const shortInterpretation = cardInterpretation.length > 300 ? 
+                      cardInterpretation.substring(0, 300) + '...' : cardInterpretation;
+                    readingHTML += shortInterpretation;
+                    
+                    readingHTML += '</div>';
+                    readingHTML += '</div>';
+                  }
                   
                   readingHTML += '</div>';
                 }
                 
-                // Overall message section
-                if (tarotReading.overall && typeof tarotReading.overall === 'string') {
-                  readingHTML += '<div class="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-xl p-6">';
-                  readingHTML += '<h3 class="text-xl font-semibold text-purple-300 mb-4">';
-                  readingHTML += '<i class="fas fa-crystal-ball mr-2"></i>Overall Guidance</h3>';
-                  readingHTML += '<div class="text-gray-200 leading-relaxed">';
-                  readingHTML += tarotReading.overall.substring(0, 1000);
-                  if (tarotReading.overall.length > 1000) readingHTML += '...';
-                  readingHTML += '</div></div>';
+                // Overall message section with enhanced safety
+                if (tarotReading && tarotReading.overall) {
+                  let overallMessage = '';
+                  try {
+                    overallMessage = String(tarotReading.overall);
+                  } catch (e) {
+                    overallMessage = 'Trust your intuition and embrace the guidance from the cards.';
+                  }
+                  
+                  if (overallMessage.trim()) {
+                    readingHTML += '<div class="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-xl p-6">';
+                    readingHTML += '<h3 class="text-xl font-semibold text-purple-300 mb-4">';
+                    readingHTML += '<i class="fas fa-crystal-ball mr-2"></i>Overall Guidance</h3>';
+                    readingHTML += '<div class="text-gray-200 leading-relaxed">';
+                    
+                    const shortOverall = overallMessage.length > 1000 ? 
+                      overallMessage.substring(0, 1000) + '...' : overallMessage;
+                    readingHTML += shortOverall;
+                    
+                    readingHTML += '</div></div>';
+                  }
                 }
                 
                 readingHTML += '</div>';
                 
-                document.getElementById('readingContent').innerHTML = readingHTML;
-                document.getElementById('results').classList.remove('hidden');
+                // Safe DOM manipulation
+                const contentElement = document.getElementById('readingContent');
+                if (contentElement) {
+                  contentElement.innerHTML = readingHTML;
+                }
                 
-                // Update credits display
-                document.getElementById('credits').textContent = response.data.remaining_credits || 0;
+                const resultsElement = document.getElementById('results');
+                if (resultsElement) {
+                  resultsElement.classList.remove('hidden');
+                }
                 
-                // Setup save button
-                document.getElementById('saveReading').onclick = () => saveToLibrary(response.data.content_id);
+                // Update credits display safely
+                const creditsElement = document.getElementById('credits');
+                if (creditsElement) {
+                  const remainingCredits = response.data.remaining_credits;
+                  creditsElement.textContent = (remainingCredits !== undefined) ? String(remainingCredits) : '0';
+                }
+                
+                // Setup save button safely
+                const saveButton = document.getElementById('saveReading');
+                if (saveButton && response.data.content_id) {
+                  saveButton.onclick = () => saveToLibrary(response.data.content_id);
+                }
               } else {
                 alert(response.data.error || 'Failed to generate tarot reading');
               }
