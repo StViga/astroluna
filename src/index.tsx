@@ -1608,10 +1608,10 @@ app.get('/zodiac', (c) => {
             
             const formData = new FormData(e.target);
             const data = {
-              type: 'compatibility',
-              first_sign: selectedFirstSign,
-              second_sign: selectedSecondSign,
-              analysis_type: formData.get('analysis_type')
+              zodiac_sign: selectedFirstSign,
+              analysis_type: 'compatibility',
+              target_sign: selectedSecondSign,
+              language: 'en'
             };
             
             await generateZodiacAnalysis(data, token);
@@ -1634,10 +1634,9 @@ app.get('/zodiac', (c) => {
             
             const formData = new FormData(e.target);
             const data = {
-              type: 'insights',
               zodiac_sign: selectedInsightSign,
-              insight_type: formData.get('insight_type'),
-              time_period: formData.get('time_period')
+              analysis_type: 'insights',
+              language: 'en'
             };
             
             await generateZodiacAnalysis(data, token);
@@ -1648,7 +1647,7 @@ app.get('/zodiac', (c) => {
               document.getElementById('loading').classList.remove('hidden');
               document.getElementById('results').classList.add('hidden');
               
-              const response = await axios.post('/api/ai/zodiac/generate', data, {
+              const response = await axios.post('/api/ai/zodiac-tome/generate', data, {
                 headers: { 
                   Authorization: \`Bearer \${token}\`,
                   'Content-Type': 'application/json'
