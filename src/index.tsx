@@ -191,7 +191,7 @@ app.get('/', (c) => {
         </section>
 
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script>{`
+        <script dangerouslySetInnerHTML={{__html: `
           // Initialize app
           document.addEventListener('DOMContentLoaded', function() {
             console.log('AstroLuna app initialized');
@@ -259,7 +259,7 @@ app.get('/', (c) => {
               console.error('Failed to load exchange rates:', error);
             }
           }
-        `}</script>
+        `}} />
       </body>
     </html>
   )
@@ -676,7 +676,7 @@ app.get('/astroscope', (c) => {
               }
             } catch (error) {
               console.error('Generation error:', error);
-              alert(error.response?.data?.error || 'Failed to generate horoscope');
+              alert((error.response && error.response.data && error.response.data.error) || 'Failed to generate horoscope');
             } finally {
               document.getElementById('loading').classList.add('hidden');
             }
@@ -1015,7 +1015,7 @@ app.get('/tarotpath', (c) => {
               }
             } catch (error) {
               console.error('Generation error:', error);
-              alert(error.response?.data?.error || 'Failed to generate tarot reading');
+              alert((error.response && error.response.data && error.response.data.error) || 'Failed to generate tarot reading');
             } finally {
               document.getElementById('loading').classList.add('hidden');
             }
@@ -1484,7 +1484,7 @@ app.get('/zodiac', (c) => {
               }
             } catch (error) {
               console.error('Generation error:', error);
-              alert(error.response?.data?.error || 'Failed to generate zodiac analysis');
+              alert((error.response && error.response.data && error.response.data.error) || 'Failed to generate zodiac analysis');
             } finally {
               document.getElementById('loading').classList.add('hidden');
             }
@@ -1795,7 +1795,7 @@ app.get('/login', (c) => {
         </div>
         
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script>{`
+        <script dangerouslySetInnerHTML={{__html: `
           document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -1813,11 +1813,14 @@ app.get('/login', (c) => {
                 window.location.href = '/dashboard';
               }
             } catch (error) {
-              const message = error.response?.data?.error || 'Login failed';
+              let message = 'Login failed';
+              if (error.response && error.response.data && error.response.data.error) {
+                message = error.response.data.error;
+              }
               alert(message);
             }
           });
-        `}</script>
+        `}} />
       </body>
     </html>
   )
@@ -1935,7 +1938,7 @@ app.get('/signup', (c) => {
         </div>
         
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script>{`
+        <script dangerouslySetInnerHTML={{__html: `
           document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -1966,11 +1969,14 @@ app.get('/signup', (c) => {
                 window.location.href = '/';
               }
             } catch (error) {
-              const message = error.response?.data?.error || 'Registration failed';
+              let message = 'Registration failed';
+              if (error.response && error.response.data && error.response.data.error) {
+                message = error.response.data.error;
+              }
               alert(message);
             }
           });
-        `}</script>
+        `}} />
       </body>
     </html>
   )
