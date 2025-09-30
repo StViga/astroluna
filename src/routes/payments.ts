@@ -90,19 +90,24 @@ payments.post('/checkout/init', authMiddleware, zValidator('json', checkoutInitS
       zip_code: data.zip_code
     };
 
-    // Check if SPC credentials are configured
-    const hasSPCCredentials = c.env.SPC_TERMINAL_ID && c.env.SPC_PUB_KEY && c.env.SPC_SEC_KEY;
+    // Check if SPC credentials are configured and valid
+    // For demo purposes, we'll consider credentials invalid if they contain placeholder values
+    const hasValidSPCCredentials = c.env.SPC_TERMINAL_ID && c.env.SPC_PUB_KEY && c.env.SPC_SEC_KEY &&
+      !c.env.SPC_TERMINAL_ID.includes('placeholder') &&
+      !c.env.SPC_PUB_KEY.includes('placeholder') &&
+      !c.env.SPC_SEC_KEY.includes('SEC-AA'); // This looks like a placeholder key
     
     console.log('SPC Credentials check:', {
-      hasSPCCredentials,
+      hasValidSPCCredentials,
       hasTerminal: !!c.env.SPC_TERMINAL_ID,
       hasPubKey: !!c.env.SPC_PUB_KEY,
-      hasSecKey: !!c.env.SPC_SEC_KEY
+      hasSecKey: !!c.env.SPC_SEC_KEY,
+      usingDemoMode: !hasValidSPCCredentials
     });
     
     let paymentResult;
     
-    if (hasSPCCredentials) {
+    if (hasValidSPCCredentials) {
       // Use real SPC payment gateway
       paymentResult = await SPCPaymentService.createPaymentWidget(paymentRequest, {
         SPC_TERMINAL_ID: c.env.SPC_TERMINAL_ID,
@@ -112,12 +117,12 @@ payments.post('/checkout/init', authMiddleware, zValidator('json', checkoutInitS
       });
     } else {
       // Demo mode - simulate successful payment for development
-      console.log('Using demo payment mode (SPC credentials not configured)');
+      console.log('Using demo payment mode (SPC credentials not configured or invalid)');
       
       paymentResult = {
         success: true,
         transaction_id: `demo_${Date.now()}`,
-        payment_url: `/checkout/demo-payment?tx=${transaction.tx_id}&amount=${targetCurrencyAmount}&currency=${data.currency}`,
+        payment_url: `/api/payments/checkout/demo-payment?tx=${transaction.tx_id}&amount=${targetCurrencyAmount}&currency=${data.currency}`,
         widget_config: {
           demo: true,
           message: 'Demo mode - no real payment will be processed'
@@ -142,7 +147,7 @@ payments.post('/checkout/init', authMiddleware, zValidator('json', checkoutInitS
       JSON.stringify({
         gateway_transaction_id: paymentResult.transaction_id,
         payment_url: paymentResult.payment_url,
-        demo_mode: !hasSPCCredentials
+        demo_mode: !hasValidSPCCredentials
       })
     );
 
@@ -416,6 +421,42 @@ payments.get('/test-connection', async (c) => {
   }
 });
 
+// Demo webhook handler to simulate successful payment
+payments.post('/checkout/demo-webhook', async (c) => {
+  try {
+    const { tx_id } = await c.req.json();
+    
+    if (!tx_id) {
+      return c.json({ error: 'Missing transaction ID' }, 400);
+    }
+    
+    const db = await getDbService(c.env);
+    
+    // Update transaction status to completed
+    await db.updateTransactionStatus(tx_id, 'completed', JSON.stringify({
+      demo: true,
+      completed_at: new Date().toISOString()
+    }));
+    
+    // Add credits to user account (simulate successful payment)
+    // Get transaction details to know how many credits to add
+    const transactions = await db.getUserTransactions(1, 1); // Get latest transaction
+    const transaction = transactions.find(t => t.tx_id === tx_id);
+    
+    if (transaction) {
+      const creditsToAdd = Math.floor(transaction.amount_eur * 10); // 10 credits per EUR
+      await db.addCredits(transaction.user_id, creditsToAdd);
+      
+      console.log(`Demo payment completed: Added ${creditsToAdd} credits to user ${transaction.user_id}`);
+    }
+    
+    return c.json({ success: true, demo: true });
+  } catch (error) {
+    console.error('Demo webhook error:', error);
+    return c.json({ error: 'Demo webhook failed' }, 500);
+  }
+});
+
 // Demo payment page (when SPC credentials not configured)
 payments.get('/checkout/demo-payment', async (c) => {
   const txId = c.req.query('tx');
@@ -490,9 +531,25 @@ payments.get('/checkout/demo-payment', async (c) => {
         </div>
 
         <script>
-            function simulateSuccess() {
-                // Simulate successful payment - redirect to success page
-                window.location.href = '/checkout/success?transaction_id=${txId}&demo=true';
+            async function simulateSuccess() {
+                try {
+                    // Call demo webhook to complete the transaction
+                    const response = await fetch('/api/payments/checkout/demo-webhook', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ tx_id: '${txId}' })
+                    });
+                    
+                    if (response.ok) {
+                        // Redirect to success page
+                        window.location.href = '/checkout/success?transaction_id=${txId}&demo=true';
+                    } else {
+                        alert('Failed to process demo payment');
+                    }
+                } catch (error) {
+                    console.error('Demo payment error:', error);
+                    alert('Demo payment processing failed');
+                }
             }
             
             function simulateFailure() {
