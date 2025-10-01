@@ -1335,7 +1335,7 @@ app.get('/zodiac', (c) => {
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(145deg, rgba(42, 42, 64, 0.4), rgba(26, 26, 48, 0.4));
+            background: linear-gradient(145deg, rgba(42, 42, 64, 0.3), rgba(26, 26, 48, 0.3));
             border-radius: inherit;
           }
           .zodiac-sign > * {
@@ -1347,14 +1347,14 @@ app.get('/zodiac', (c) => {
             transform: translateY(-2px);
           }
           .zodiac-sign:hover::before {
-            background: linear-gradient(145deg, rgba(42, 42, 64, 0.2), rgba(26, 26, 48, 0.2));
+            background: linear-gradient(145deg, rgba(42, 42, 64, 0.1), rgba(26, 26, 48, 0.1));
           }
           .zodiac-sign.selected {
             border-color: #06b6d4;
             box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
           }
           .zodiac-sign.selected::before {
-            background: linear-gradient(145deg, rgba(6, 182, 212, 0.2), rgba(6, 182, 212, 0.1));
+            background: linear-gradient(145deg, rgba(6, 182, 212, 0.1), rgba(6, 182, 212, 0.05));
           }
         `}</style>
       </head>
