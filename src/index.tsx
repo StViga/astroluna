@@ -487,7 +487,7 @@ app.get('/astroscope', (c) => {
         </nav>
 
         {/* Main Content */}
-        <div className="pt-24 min-h-screen">
+        <div className="astroscope-bg pt-24 min-h-screen">
           <div className="max-w-4xl mx-auto px-6 py-8">
             <div className="text-center mb-12">
               <h1 className="text-5xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
