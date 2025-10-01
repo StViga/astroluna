@@ -90,23 +90,52 @@ body {
 
 /* Zodiac sign images */
 .zodiac-sign {
-  width: 120px;
-  height: 120px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   background-size: cover;
   background-position: center;
   border: 2px solid rgba(244, 247, 255, 0.3);
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .zodiac-sign:hover {
   border-color: #60a5fa;
-  transform: scale(1.05);
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
 }
 
+/* Larger zodiac signs for individual pages */
+.zodiac-sign-large {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  border: 3px solid rgba(244, 247, 255, 0.4);
+  transition: all 0.3s ease;
+}
+
+/* All 12 zodiac signs */
 .zodiac-aries { background-image: url('/static/images/zodiac/aries.webp'); }
+.zodiac-taurus { background-image: url('/static/images/zodiac/taurus.webp'); }
+.zodiac-gemini { background-image: url('/static/images/zodiac/gemini.webp'); }
+.zodiac-cancer { background-image: url('/static/images/zodiac/cancer.webp'); }
 .zodiac-leo { background-image: url('/static/images/zodiac/leo.webp'); }
+.zodiac-virgo { background-image: url('/static/images/zodiac/virgo.webp'); }
+.zodiac-libra { background-image: url('/static/images/zodiac/libra.webp'); }
 .zodiac-scorpio { background-image: url('/static/images/zodiac/scorpio.webp'); }
+.zodiac-sagittarius { background-image: url('/static/images/zodiac/sagittarius.webp'); }
+.zodiac-capricorn { background-image: url('/static/images/zodiac/capricorn.webp'); }
+.zodiac-aquarius { background-image: url('/static/images/zodiac/aquarius.webp'); }
+.zodiac-pisces { background-image: url('/static/images/zodiac/pisces.webp'); }
+
+/* Zodiac background for general zodiac pages */
+.zodiac-bg {
+  background: url('/static/images/backgrounds/zodiac-bg.webp') center/cover no-repeat;
+  position: relative;
+}
 
 /* Moon icon */
 .moon-icon {

@@ -198,28 +198,64 @@ app.get('/', (c) => {
         </section>
 
         {/* Zodiac Signs Preview */}
-        <section className="py-20 px-6 bg-gradient-to-b from-gray-900/50 to-black/30">
-          <div className="max-w-6xl mx-auto text-center">
+        <section className="zodiac-bg service-section">
+          <div className="service-content max-w-6xl mx-auto text-center">
             <h2 className="text-4xl font-bold mb-16 cosmic-heading">
-              Explore Zodiac Signs
+              Explore All 12 Zodiac Signs
             </h2>
-            <div className="flex flex-wrap justify-center gap-8 mb-12">
+            <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-12 gap-4 mb-12">
               <div className="cosmic-particle">
-                <div className="zodiac-sign zodiac-aries" title="Aries"></div>
-                <p className="cosmic-text mt-2 text-sm">Aries</p>
+                <div className="zodiac-sign zodiac-aries mx-auto" title="Aries"></div>
+                <p className="cosmic-text mt-2 text-xs">♈ Aries</p>
               </div>
-              <div className="cosmic-particle" style="animation-delay: 1s;">
-                <div className="zodiac-sign zodiac-leo" title="Leo"></div>
-                <p className="cosmic-text mt-2 text-sm">Leo</p>
+              <div className="cosmic-particle" style="animation-delay: 0.2s;">
+                <div className="zodiac-sign zodiac-taurus mx-auto" title="Taurus"></div>
+                <p className="cosmic-text mt-2 text-xs">♉ Taurus</p>
               </div>
-              <div className="cosmic-particle" style="animation-delay: 2s;">
-                <div className="zodiac-sign zodiac-scorpio" title="Scorpio"></div>
-                <p className="cosmic-text mt-2 text-sm">Scorpio</p>
+              <div className="cosmic-particle" style="animation-delay: 0.4s;">
+                <div className="zodiac-sign zodiac-gemini mx-auto" title="Gemini"></div>
+                <p className="cosmic-text mt-2 text-xs">♊ Gemini</p>
+              </div>
+              <div className="cosmic-particle" style="animation-delay: 0.6s;">
+                <div className="zodiac-sign zodiac-cancer mx-auto" title="Cancer"></div>
+                <p className="cosmic-text mt-2 text-xs">♋ Cancer</p>
+              </div>
+              <div className="cosmic-particle" style="animation-delay: 0.8s;">
+                <div className="zodiac-sign zodiac-leo mx-auto" title="Leo"></div>
+                <p className="cosmic-text mt-2 text-xs">♌ Leo</p>
+              </div>
+              <div className="cosmic-particle" style="animation-delay: 1.0s;">
+                <div className="zodiac-sign zodiac-virgo mx-auto" title="Virgo"></div>
+                <p className="cosmic-text mt-2 text-xs">♍ Virgo</p>
+              </div>
+              <div className="cosmic-particle" style="animation-delay: 1.2s;">
+                <div className="zodiac-sign zodiac-libra mx-auto" title="Libra"></div>
+                <p className="cosmic-text mt-2 text-xs">♎ Libra</p>
+              </div>
+              <div className="cosmic-particle" style="animation-delay: 1.4s;">
+                <div className="zodiac-sign zodiac-scorpio mx-auto" title="Scorpio"></div>
+                <p className="cosmic-text mt-2 text-xs">♏ Scorpio</p>
+              </div>
+              <div className="cosmic-particle" style="animation-delay: 1.6s;">
+                <div className="zodiac-sign zodiac-sagittarius mx-auto" title="Sagittarius"></div>
+                <p className="cosmic-text mt-2 text-xs">♐ Sagittarius</p>
+              </div>
+              <div className="cosmic-particle" style="animation-delay: 1.8s;">
+                <div className="zodiac-sign zodiac-capricorn mx-auto" title="Capricorn"></div>
+                <p className="cosmic-text mt-2 text-xs">♑ Capricorn</p>
+              </div>
+              <div className="cosmic-particle" style="animation-delay: 2.0s;">
+                <div className="zodiac-sign zodiac-aquarius mx-auto" title="Aquarius"></div>
+                <p className="cosmic-text mt-2 text-xs">♒ Aquarius</p>
+              </div>
+              <div className="cosmic-particle" style="animation-delay: 2.2s;">
+                <div className="zodiac-sign zodiac-pisces mx-auto" title="Pisces"></div>
+                <p className="cosmic-text mt-2 text-xs">♓ Pisces</p>
               </div>
             </div>
-            <a href="/zodiac" className="inline-block bg-gradient-to-r from-cyan-600 to-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:glow transition-all">
+            <a href="/zodiac" className="inline-block bg-gradient-to-r from-cyan-600 to-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:glow transition-all lunar-glow">
               <i className="fas fa-star-of-david mr-2"></i>
-              Explore All Signs
+              Explore Detailed Analysis
             </a>
           </div>
         </section>
