@@ -1323,26 +1323,38 @@ app.get('/zodiac', (c) => {
             box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
           }
           .zodiac-sign {
-            background: 
-              linear-gradient(145deg, rgba(42, 42, 64, 0.8), rgba(26, 26, 48, 0.8)),
-              url('/static/images/backgrounds/zodiac-wheel-golden.jpg') center/cover no-repeat;
+            background: url('/static/images/backgrounds/zodiac-wheel-golden.jpg') center/cover no-repeat;
             border: 2px solid rgba(6, 182, 212, 0.3);
             transition: all 0.3s ease;
             position: relative;
           }
+          .zodiac-sign::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(145deg, rgba(42, 42, 64, 0.4), rgba(26, 26, 48, 0.4));
+            border-radius: inherit;
+          }
+          .zodiac-sign > * {
+            position: relative;
+            z-index: 1;
+          }
           .zodiac-sign:hover {
             border-color: rgba(6, 182, 212, 0.6);
             transform: translateY(-2px);
-            background: 
-              linear-gradient(145deg, rgba(42, 42, 64, 0.6), rgba(26, 26, 48, 0.6)),
-              url('/static/images/backgrounds/zodiac-wheel-golden.jpg') center/cover no-repeat;
+          }
+          .zodiac-sign:hover::before {
+            background: linear-gradient(145deg, rgba(42, 42, 64, 0.2), rgba(26, 26, 48, 0.2));
           }
           .zodiac-sign.selected {
             border-color: #06b6d4;
-            background: 
-              linear-gradient(145deg, rgba(6, 182, 212, 0.2), rgba(6, 182, 212, 0.1)),
-              url('/static/images/backgrounds/zodiac-wheel-golden.jpg') center/cover no-repeat;
             box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+          }
+          .zodiac-sign.selected::before {
+            background: linear-gradient(145deg, rgba(6, 182, 212, 0.2), rgba(6, 182, 212, 0.1));
           }
         `}</style>
       </head>
