@@ -1325,7 +1325,7 @@ app.get('/zodiac', (c) => {
           .zodiac-sign {
             background: 
               linear-gradient(145deg, rgba(42, 42, 64, 0.8), rgba(26, 26, 48, 0.8)),
-              url('/static/images/backgrounds/zodiac-wheel-golden.webp') center/cover no-repeat;
+              url('/static/images/backgrounds/zodiac-wheel-golden.jpg') center/cover no-repeat;
             border: 2px solid rgba(6, 182, 212, 0.3);
             transition: all 0.3s ease;
             position: relative;
@@ -1335,13 +1335,13 @@ app.get('/zodiac', (c) => {
             transform: translateY(-2px);
             background: 
               linear-gradient(145deg, rgba(42, 42, 64, 0.6), rgba(26, 26, 48, 0.6)),
-              url('/static/images/backgrounds/zodiac-wheel-golden.webp') center/cover no-repeat;
+              url('/static/images/backgrounds/zodiac-wheel-golden.jpg') center/cover no-repeat;
           }
           .zodiac-sign.selected {
             border-color: #06b6d4;
             background: 
               linear-gradient(145deg, rgba(6, 182, 212, 0.2), rgba(6, 182, 212, 0.1)),
-              url('/static/images/backgrounds/zodiac-wheel-golden.webp') center/cover no-repeat;
+              url('/static/images/backgrounds/zodiac-wheel-golden.jpg') center/cover no-repeat;
             box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
           }
         `}</style>
