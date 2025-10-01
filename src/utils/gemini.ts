@@ -176,8 +176,10 @@ Write in an engaging, mystical style that ${sign} individuals will connect with.
    * Generate Tarot reading for TarotPath
    */
   static async generateTarotReading(data: {
-    name: string;
-    birthDate: string;
+    question: string;
+    reading_type: string;
+    spread_type: string;
+    selected_cards: number[];
     language: 'en' | 'es' | 'de';
   }, apiKey: string): Promise<{
     title: string;
@@ -192,24 +194,89 @@ Write in an engaging, mystical style that ${sign} individuals will connect with.
     
     const currentMonth = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' });
     
-    const prompt = `Create a mystical Tarot reading for ${data.name} (born ${data.birthDate}) for ${currentMonth}.
+    // Map card numbers to actual tarot cards (using selected_cards)
+    const majorArcana = [
+      'The Fool', 'The Magician', 'The High Priestess', 'The Empress', 'The Emperor',
+      'The Hierophant', 'The Lovers', 'The Chariot', 'Strength', 'The Hermit',
+      'Wheel of Fortune', 'Justice', 'The Hanged Man', 'Death', 'Temperance',
+      'The Devil', 'The Tower', 'The Star', 'The Moon', 'The Sun', 'Judgement', 'The World'
+    ];
+    
+    const minorArcana = [
+      // Cups
+      'Ace of Cups', 'Two of Cups', 'Three of Cups', 'Four of Cups', 'Five of Cups',
+      'Six of Cups', 'Seven of Cups', 'Eight of Cups', 'Nine of Cups', 'Ten of Cups',
+      'Page of Cups', 'Knight of Cups', 'Queen of Cups', 'King of Cups',
+      // Swords  
+      'Ace of Swords', 'Two of Swords', 'Three of Swords', 'Four of Swords', 'Five of Swords',
+      'Six of Swords', 'Seven of Swords', 'Eight of Swords', 'Nine of Swords', 'Ten of Swords',
+      'Page of Swords', 'Knight of Swords', 'Queen of Swords', 'King of Swords',
+      // Wands
+      'Ace of Wands', 'Two of Wands', 'Three of Wands', 'Four of Wands', 'Five of Wands',
+      'Six of Wands', 'Seven of Wands', 'Eight of Wands', 'Nine of Wands', 'Ten of Wands',
+      'Page of Wands', 'Knight of Wands', 'Queen of Wands', 'King of Wands',
+      // Pentacles
+      'Ace of Pentacles', 'Two of Pentacles', 'Three of Pentacles', 'Four of Pentacles', 'Five of Pentacles',
+      'Six of Pentacles', 'Seven of Pentacles', 'Eight of Pentacles', 'Nine of Pentacles', 'Ten of Pentacles',
+      'Page of Pentacles', 'Knight of Pentacles', 'Queen of Pentacles', 'King of Pentacles'
+    ];
+    
+    const allCards = [...majorArcana, ...minorArcana];
+    
+    // Get the selected cards by their indices
+    const selectedCardNames = data.selected_cards.map((cardIndex, position) => {
+      const cardName = allCards[cardIndex % allCards.length] || `Unknown Card ${cardIndex}`;
+      return { cardName, position: position + 1 };
+    });
+    
+    // Define spread positions based on spread_type
+    const spreadPositions = {
+      'lunar_path': [
+        'Past Influences',
+        'Present Situation', 
+        'Hidden Influences',
+        'Future Potential',
+        'Guidance & Wisdom'
+      ],
+      'celtic_cross': [
+        'Current Situation',
+        'Challenge/Cross',
+        'Distant Past/Foundation',
+        'Recent Past',
+        'Possible Future'
+      ],
+      'three_card': [
+        'Past',
+        'Present',
+        'Future',
+        'Advice',
+        'Outcome'
+      ]
+    };
+    
+    const positions = spreadPositions[data.spread_type] || spreadPositions['lunar_path'];
+    
+    const cardList = selectedCardNames.map((card, index) => 
+      `${index + 1}. ${positions[index]}: ${card.cardName}`
+    ).join('\n');
+    
+    const prompt = `Create a mystical Tarot reading for the question: "${data.question}"
 
-Generate a 5-card spread with the following positions:
-1. PAST INFLUENCES - What energies from the past are affecting them now
-2. PRESENT SITUATION - Current life circumstances and challenges  
-3. HIDDEN INFLUENCES - Subconscious factors and unseen energies
-4. FUTURE POTENTIAL - What they're moving toward this month
-5. GUIDANCE - Advice and wisdom for their path forward
+The reading type is: ${data.reading_type}
+Spread layout: ${data.spread_type}
 
-For each card, provide:
-- Card name (choose from traditional Tarot deck)
-- Position meaning
-- Detailed interpretation for ${data.name}'s specific situation
+Selected cards for this reading:
+${cardList}
+
+For each of the 5 cards, provide:
+- Position meaning and relevance to the question
+- Detailed interpretation of how this specific card answers their question
 - Brief description of the card's imagery and symbolism
+- Personal guidance based on this card's message
 
-End with an OVERALL MESSAGE that ties all the cards together into cohesive guidance.
+End with an OVERALL MESSAGE that weaves all the cards together into cohesive wisdom for their question: "${data.question}"
 
-Use mystical, intuitive language that feels personal and insightful. Make the reading feel authentic and meaningful.
+Use mystical, intuitive language that feels personal and insightful. Make the reading feel authentic and meaningful, directly addressing their specific question.
 
 Language: ${data.language === 'en' ? 'English' : data.language === 'es' ? 'Spanish' : 'German'}`;
 
@@ -218,7 +285,7 @@ Language: ${data.language === 'en' ? 'English' : data.language === 'es' ? 'Spani
       maxOutputTokens: 2048
     });
 
-    return this.parseTarotContent(generatedContent, data.name, currentMonth);
+    return this.parseTarotContent(generatedContent, data.question, currentMonth);
   }
 
   /**
@@ -348,8 +415,8 @@ Write with depth and nuance, going beyond typical zodiac descriptions to provide
   /**
    * Parse tarot content into structured format
    */
-  private static parseTarotContent(content: string, name: string, month: string) {
-    const title = `Tarot Reading for ${name} - ${month}`;
+  private static parseTarotContent(content: string, question: string, month: string) {
+    const title = `Tarot Reading: "${question}" - ${month}`;
     
     // Simple parsing - extract card information
     const cardSections = content.split(/\d+\./);

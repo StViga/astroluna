@@ -40,8 +40,10 @@ const astroScopeSchema = z.object({
 });
 
 const tarotPathSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  birth_date: z.string().min(1, 'Birth date is required'),
+  question: z.string().min(1, 'Question is required'),
+  reading_type: z.string().min(1, 'Reading type is required'),
+  spread_type: z.string().min(1, 'Spread type is required'),
+  selected_cards: z.array(z.number()).min(5, 'Must select 5 cards').max(5, 'Must select exactly 5 cards'),
   language: z.enum(['en', 'es', 'de']).default('en')
 });
 
@@ -191,8 +193,10 @@ aiServices.post('/tarotpath/generate', authMiddleware, zValidator('json', tarotP
           overall: tarotReading.overall
         }),
         meta: JSON.stringify({
-          name: data.name,
-          birth_date: data.birth_date,
+          question: data.question,
+          reading_type: data.reading_type,
+          spread_type: data.spread_type,
+          selected_cards: data.selected_cards,
           language: data.language,
           generated_at: new Date().toISOString()
         })

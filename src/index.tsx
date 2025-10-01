@@ -114,12 +114,13 @@ app.get('/', (c) => {
         </nav>
 
         {/* Hero Section */}
-        <section className="hero-bg min-h-screen flex items-center justify-center pt-20">
-          <div className="text-center max-w-4xl mx-auto px-6">
-            <h1 className="text-6xl md:text-7xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
+        <section className="hero-section">
+          <div className="hero-content max-w-4xl mx-auto px-6">
+            <div className="moon-icon mx-auto mb-6"></div>
+            <h1 className="text-6xl md:text-7xl font-bold mb-6 cosmic-heading">
               Discover Your Cosmic Destiny
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed">
+            <p className="text-xl md:text-2xl cosmic-text mb-8 leading-relaxed">
               AI-powered astrology oracle that combines the wisdom of stars and Tarot cards to reveal your personalized cosmic insights
             </p>
             <div className="flex flex-col md:flex-row gap-4 justify-center">
@@ -141,52 +142,85 @@ app.get('/', (c) => {
         {/* Services Section */}
         <section id="services" className="py-20 px-6">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-4xl font-bold text-center mb-16 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
+            <h2 className="text-4xl font-bold text-center mb-16 cosmic-heading">
               What's Inside
             </h2>
             <div className="grid md:grid-cols-3 gap-8">
               {/* AstroScope */}
-              <div className="bg-gray-800/30 backdrop-blur-sm border border-purple-500/30 rounded-xl p-8 hover:border-purple-500/60 transition-colors">
-                <div className="text-4xl mb-4 text-purple-400">
-                  <i className="fas fa-moon"></i>
+              <div className="astroscope-section service-section">
+                <div className="service-content glass-card lunar-glow">
+                  <div className="text-4xl mb-4 text-purple-400">
+                    <i className="fas fa-moon"></i>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4 cosmic-text">AstroScope</h3>
+                  <p className="text-gray-300 mb-6">
+                    Personalized monthly horoscopes with key events and favorable dates based on your birth data
+                  </p>
+                  <a href="/astroscope" className="w-full bg-gradient-to-r from-purple-600 to-blue-600 py-3 rounded-lg font-semibold hover:glow transition-all inline-block text-center">
+                    Get Started
+                  </a>
                 </div>
-                <h3 className="text-2xl font-bold mb-4">AstroScope</h3>
-                <p className="text-gray-400 mb-6">
-                  Personalized monthly horoscopes with key events and favorable dates based on your birth data
-                </p>
-                <a href="/astroscope" className="w-full bg-gradient-to-r from-purple-600 to-blue-600 py-3 rounded-lg font-semibold hover:glow transition-all inline-block text-center">
-                  Get Started
-                </a>
               </div>
 
               {/* TarotPath */}
-              <div className="bg-gray-800/30 backdrop-blur-sm border border-pink-500/30 rounded-xl p-8 hover:border-pink-500/60 transition-colors">
-                <div className="text-4xl mb-4 text-pink-400">
-                  <i className="fas fa-cards-blank"></i>
+              <div className="tarotpath-section service-section">
+                <div className="service-content glass-card teal-glow">
+                  <div className="text-4xl mb-4 text-pink-400">
+                    <i className="fas fa-cards-blank"></i>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4 cosmic-text">TarotPath</h3>
+                  <p className="text-gray-300 mb-6">
+                    AI-generated Tarot card spreads that reveal your lunar path with interactive virtual deck
+                  </p>
+                  <a href="/tarotpath" className="w-full bg-gradient-to-r from-pink-600 to-purple-600 py-3 rounded-lg font-semibold hover:glow transition-all inline-block text-center">
+                    Get Started
+                  </a>
                 </div>
-                <h3 className="text-2xl font-bold mb-4">TarotPath</h3>
-                <p className="text-gray-400 mb-6">
-                  AI-generated Tarot card spreads that reveal your lunar path with interactive virtual deck
-                </p>
-                <a href="/tarotpath" className="w-full bg-gradient-to-r from-pink-600 to-purple-600 py-3 rounded-lg font-semibold hover:glow transition-all inline-block text-center">
-                  Get Started
-                </a>
               </div>
 
               {/* ZodiacTome */}
-              <div className="bg-gray-800/30 backdrop-blur-sm border border-cyan-500/30 rounded-xl p-8 hover:border-cyan-500/60 transition-colors">
-                <div className="text-4xl mb-4 text-cyan-400">
-                  <i className="fas fa-star-of-david"></i>
+              <div className="zodictome-section service-section">
+                <div className="service-content glass-card lunar-glow">
+                  <div className="text-4xl mb-4 text-cyan-400">
+                    <i className="fas fa-star-of-david"></i>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4 cosmic-text">ZodiacTome</h3>
+                  <p className="text-gray-300 mb-6">
+                    Comprehensive zodiac knowledge base with compatibility analysis and AI-powered insights
+                  </p>
+                  <a href="/zodiac" className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 py-3 rounded-lg font-semibold hover:glow transition-all inline-block text-center">
+                    Get Started
+                  </a>
                 </div>
-                <h3 className="text-2xl font-bold mb-4">ZodiacTome</h3>
-                <p className="text-gray-400 mb-6">
-                  Comprehensive zodiac knowledge base with compatibility analysis and AI-powered insights
-                </p>
-                <a href="/zodiac" className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 py-3 rounded-lg font-semibold hover:glow transition-all inline-block text-center">
-                  Get Started
-                </a>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Zodiac Signs Preview */}
+        <section className="py-20 px-6 bg-gradient-to-b from-gray-900/50 to-black/30">
+          <div className="max-w-6xl mx-auto text-center">
+            <h2 className="text-4xl font-bold mb-16 cosmic-heading">
+              Explore Zodiac Signs
+            </h2>
+            <div className="flex flex-wrap justify-center gap-8 mb-12">
+              <div className="cosmic-particle">
+                <div className="zodiac-sign zodiac-aries" title="Aries"></div>
+                <p className="cosmic-text mt-2 text-sm">Aries</p>
+              </div>
+              <div className="cosmic-particle" style="animation-delay: 1s;">
+                <div className="zodiac-sign zodiac-leo" title="Leo"></div>
+                <p className="cosmic-text mt-2 text-sm">Leo</p>
+              </div>
+              <div className="cosmic-particle" style="animation-delay: 2s;">
+                <div className="zodiac-sign zodiac-scorpio" title="Scorpio"></div>
+                <p className="cosmic-text mt-2 text-sm">Scorpio</p>
+              </div>
+            </div>
+            <a href="/zodiac" className="inline-block bg-gradient-to-r from-cyan-600 to-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:glow transition-all">
+              <i className="fas fa-star-of-david mr-2"></i>
+              Explore All Signs
+            </a>
           </div>
         </section>
 
