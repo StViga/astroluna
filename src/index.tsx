@@ -1335,7 +1335,7 @@ app.get('/zodiac', (c) => {
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(145deg, rgba(42, 42, 64, 0.3), rgba(26, 26, 48, 0.3));
+            background: linear-gradient(145deg, rgba(42, 42, 64, 0.4), rgba(26, 26, 48, 0.4));
             border-radius: inherit;
           }
           .zodiac-sign > * {
@@ -1347,14 +1347,14 @@ app.get('/zodiac', (c) => {
             transform: translateY(-2px);
           }
           .zodiac-sign:hover::before {
-            background: linear-gradient(145deg, rgba(42, 42, 64, 0.1), rgba(26, 26, 48, 0.1));
+            background: linear-gradient(145deg, rgba(42, 42, 64, 0.2), rgba(26, 26, 48, 0.2));
           }
           .zodiac-sign.selected {
             border-color: #06b6d4;
             box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
           }
           .zodiac-sign.selected::before {
-            background: linear-gradient(145deg, rgba(6, 182, 212, 0.1), rgba(6, 182, 212, 0.05));
+            background: linear-gradient(145deg, rgba(6, 182, 212, 0.2), rgba(6, 182, 212, 0.1));
           }
         `}</style>
       </head>
@@ -1409,7 +1409,7 @@ app.get('/zodiac', (c) => {
             {/* Service Options */}
             <div className="grid lg:grid-cols-2 gap-8 mb-12">
               {/* Compatibility Analysis */}
-              <div className="bg-gray-800/30 backdrop-blur-sm border border-cyan-500/30 rounded-xl p-8">
+              <div className="bg-gray-800/20 backdrop-blur-sm border border-cyan-500/30 rounded-xl p-8">
                 <div className="text-center mb-6">
                   <div className="text-4xl text-cyan-400 mb-4">
                     <i className="fas fa-heart"></i>
@@ -1505,7 +1505,7 @@ app.get('/zodiac', (c) => {
               </div>
 
               {/* Zodiac Insights */}
-              <div className="bg-gray-800/30 backdrop-blur-sm border border-blue-500/30 rounded-xl p-8">
+              <div className="bg-gray-800/20 backdrop-blur-sm border border-blue-500/30 rounded-xl p-8">
                 <div className="text-center mb-6">
                   <div className="text-4xl text-blue-400 mb-4">
                     <i className="fas fa-star"></i>
