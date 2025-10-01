@@ -143,6 +143,24 @@ body {
   position: relative;
 }
 
+/* TarotPath background */
+.tarotpath-bg {
+  background: url('/static/images/backgrounds/tarotpath-bg.webp') center/cover no-repeat;
+  position: relative;
+}
+
+/* ZodiacTome background */
+.zodiac-tome-bg {
+  background: url('/static/images/backgrounds/zodiac-tome-bg.webp') center/cover no-repeat;
+  position: relative;
+}
+
+/* Dashboard background */
+.dashboard-bg {
+  background: url('/static/images/backgrounds/dashboard-bg.webp') center/cover no-repeat;
+  position: relative;
+}
+
 /* Moon icon */
 .moon-icon {
   background: url('/static/images/icons/moon.webp') center/contain no-repeat;

@@ -928,7 +928,7 @@ app.get('/tarotpath', (c) => {
         </nav>
 
         {/* Main Content */}
-        <div className="pt-24 min-h-screen">
+        <div className="tarotpath-bg pt-24 min-h-screen">
           <div className="max-w-6xl mx-auto px-6 py-8">
             <div className="text-center mb-12">
               <h1 className="text-5xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">
@@ -1374,7 +1374,7 @@ app.get('/zodiac', (c) => {
         </nav>
 
         {/* Main Content */}
-        <div className="pt-24 min-h-screen">
+        <div className="zodiac-tome-bg pt-24 min-h-screen">
           <div className="max-w-6xl mx-auto px-6 py-8">
             <div className="text-center mb-12">
               <h1 className="text-5xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">
@@ -1893,7 +1893,7 @@ app.get('/dashboard', (c) => {
         </nav>
 
         {/* Main Content */}
-        <div className="pt-24 min-h-screen">
+        <div className="dashboard-bg pt-24 min-h-screen">
           <div className="max-w-6xl mx-auto px-6 py-8">
             <div className="mb-8">
               <h1 className="text-4xl font-bold mb-2">
