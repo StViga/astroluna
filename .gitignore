@@ -1,5 +1,5 @@
-# prod
-dist/
+# prod  
+# dist/ - commented out for Cloudflare Pages deployment
 
 # dev
 .yarn/

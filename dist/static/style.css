@@ -1,0 +1,237 @@
+/* AstroLuna - Cosmic Watercolor Styles */
+
+/* Base styles */
+h1 { 
+  font-family: Arial, Helvetica, sans-serif; 
+}
+
+body {
+  background: linear-gradient(135deg, #0a0c18 0%, #1a1b3a 100%);
+  min-height: 100vh;
+}
+
+/* Hero section with cosmic background */
+.hero-section {
+  background: url('/static/images/backgrounds/hero-bg.webp') center/cover no-repeat;
+  background-attachment: fixed;
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 12, 24, 0.35);
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: #F4F7FF;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+}
+
+/* Service sections backgrounds */
+.astroscope-section {
+  background: url('/static/images/backgrounds/astroscope-bg.webp') center/cover no-repeat;
+  position: relative;
+}
+
+.tarotpath-section {
+  background: url('/static/images/backgrounds/tarotpath-bg.webp') center/cover no-repeat;
+  position: relative;
+}
+
+.zodictome-section {
+  background: url('/static/images/backgrounds/zodictome-bg.webp') center/cover no-repeat;
+  position: relative;
+}
+
+/* Service section overlay */
+.service-section {
+  position: relative;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 0;
+}
+
+.service-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(240, 245, 255, 0.25);
+  z-index: 1;
+}
+
+.service-content {
+  position: relative;
+  z-index: 2;
+  background: rgba(10, 12, 24, 0.85);
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  padding: 2rem;
+  border: 1px solid rgba(244, 247, 255, 0.2);
+  color: #F4F7FF;
+}
+
+/* Zodiac sign images */
+.zodiac-sign {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid rgba(244, 247, 255, 0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.zodiac-sign:hover {
+  border-color: #60a5fa;
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+}
+
+/* Larger zodiac signs for individual pages */
+.zodiac-sign-large {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  border: 3px solid rgba(244, 247, 255, 0.4);
+  transition: all 0.3s ease;
+}
+
+/* All 12 zodiac signs */
+.zodiac-aries { background-image: url('/static/images/zodiac/aries.webp'); }
+.zodiac-taurus { background-image: url('/static/images/zodiac/taurus.webp'); }
+.zodiac-gemini { background-image: url('/static/images/zodiac/gemini.webp'); }
+.zodiac-cancer { background-image: url('/static/images/zodiac/cancer.webp'); }
+.zodiac-leo { background-image: url('/static/images/zodiac/leo.webp'); }
+.zodiac-virgo { background-image: url('/static/images/zodiac/virgo.webp'); }
+.zodiac-libra { background-image: url('/static/images/zodiac/libra.webp'); }
+.zodiac-scorpio { background-image: url('/static/images/zodiac/scorpio.webp'); }
+.zodiac-sagittarius { background-image: url('/static/images/zodiac/sagittarius.webp'); }
+.zodiac-capricorn { background-image: url('/static/images/zodiac/capricorn.webp'); }
+.zodiac-aquarius { background-image: url('/static/images/zodiac/aquarius.webp'); }
+.zodiac-pisces { background-image: url('/static/images/zodiac/pisces.webp'); }
+
+/* Zodiac background for general zodiac pages */
+.zodiac-bg {
+  background: url('/static/images/backgrounds/zodiac-bg.webp') center/cover no-repeat;
+  position: relative;
+}
+
+/* Astroscope background */
+.astroscope-bg {
+  background: url('/static/images/backgrounds/astroscope-bg.webp') center/cover no-repeat;
+  position: relative;
+}
+
+/* TarotPath background */
+.tarotpath-bg {
+  background: url('/static/images/backgrounds/tarotpath-bg.webp') center/cover no-repeat;
+  position: relative;
+}
+
+/* ZodiacTome background */
+.zodiac-tome-bg {
+  background: url('/static/images/backgrounds/zodiac-tome-bg.webp') center/cover no-repeat;
+  position: relative;
+}
+
+/* Dashboard background */
+.dashboard-bg {
+  background: url('/static/images/backgrounds/dashboard-bg.webp') center/cover no-repeat;
+  position: relative;
+}
+
+/* Moon icon */
+.moon-icon {
+  background: url('/static/images/icons/moon.webp') center/contain no-repeat;
+  width: 48px;
+  height: 48px;
+  display: inline-block;
+}
+
+/* Glass morphism cards */
+.glass-card {
+  background: rgba(244, 247, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(244, 247, 255, 0.2);
+  border-radius: 1rem;
+  padding: 2rem;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  background: rgba(244, 247, 255, 0.15);
+  border-color: rgba(96, 165, 250, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Cosmic particles animation */
+@keyframes cosmic-drift {
+  0% { transform: translateY(0) translateX(0); opacity: 0.3; }
+  50% { transform: translateY(-10px) translateX(5px); opacity: 0.8; }
+  100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+}
+
+.cosmic-particle {
+  animation: cosmic-drift 4s ease-in-out infinite;
+}
+
+/* Soft glow effects */
+.lunar-glow {
+  box-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
+}
+
+.teal-glow {
+  box-shadow: 0 0 15px rgba(45, 212, 191, 0.4);
+}
+
+/* Text with cosmic styling */
+.cosmic-text {
+  color: #F4F7FF;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+}
+
+.cosmic-heading {
+  background: linear-gradient(135deg, #F4F7FF 0%, #93C5FD 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hero-section {
+    background-attachment: scroll;
+  }
+  
+  .service-section {
+    min-height: 50vh;
+    padding: 2rem 0;
+  }
+  
+  .zodiac-sign {
+    width: 80px;
+    height: 80px;
+  }
+}
