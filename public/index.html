@@ -5,15 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AstroLuna - AI-Powered Astrology</title>
     <script>
-        // Redirect all requests to server
-        if (window.location.pathname !== '/') {
-            window.location.href = '/';
+        // For Netlify, redirect to Netlify function
+        if (window.location.hostname.includes('netlify')) {
+            // Check if we're being served by function already
+            if (!window.location.pathname.includes('.netlify/functions')) {
+                window.location.href = '/.netlify/functions/server' + window.location.pathname + window.location.search;
+            }
         } else {
-            // If we're on root, try to load the app
+            // For other platforms, try to load the app
             fetch('/api/health')
                 .then(r => r.json())
-                .then(() => window.location.reload())
-                .catch(() => setTimeout(() => window.location.reload(), 1000));
+                .then(() => {
+                    // Health check passed, load the actual app
+                    if (window.location.pathname === '/') {
+                        fetch('/')
+                            .then(r => r.text())
+                            .then(html => {
+                                if (html.includes('AstroLuna') && !html.includes('Loading your cosmic journey')) {
+                                    document.body.innerHTML = html;
+                                }
+                            })
+                            .catch(() => setTimeout(() => window.location.reload(), 2000));
+                    }
+                })
+                .catch(() => setTimeout(() => window.location.reload(), 2000));
         }
     </script>
     <style>

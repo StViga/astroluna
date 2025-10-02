@@ -1,11 +1,6 @@
 [build]
   publish = "public"
-  command = "npm run build:node"
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/server/:splat"
-  status = 200
+  command = "npm run build"
 
 [[redirects]]
   from = "/static/*"
@@ -14,8 +9,9 @@
 
 [[redirects]]
   from = "/*"
-  to = "/.netlify/functions/server/:splat"
+  to = "/.netlify/functions/app"
   status = 200
 
 [functions]
   directory = "netlify/functions"
+  node_bundler = "esbuild"
