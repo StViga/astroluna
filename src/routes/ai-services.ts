@@ -92,9 +92,21 @@ aiServices.post('/astroscope/generate', authMiddleware, zValidator('json', astro
 
     try {
       // Generate horoscope using Gemini API
-      const geminiApiKey = c.env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY || 'AIzaSyB9QfEPqQ0yrOiMYw6bsp6-lVO6a9wCE4Q';
+      const geminiApiKey = c.env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
       if (!geminiApiKey) {
-        throw new Error('Gemini API key not configured');
+        // Return demo content when API key is not available
+        return c.json({
+          success: true,
+          message: 'Horoscope generated (Demo mode - configure GEMINI_API_KEY for real AI content)',
+          horoscope: {
+            title: `${data.zodiac_sign || 'Your'} Daily Horoscope - Demo`,
+            content: `This is a demo horoscope for ${data.zodiac_sign || 'you'}. The stars align beautifully today, bringing opportunities for growth and positive change. Trust your intuition and embrace new experiences. Configure GEMINI_API_KEY environment variable for personalized AI-powered horoscopes.`,
+            type: data.type,
+            zodiac_sign: data.zodiac_sign,
+            generated_at: new Date().toISOString()
+          },
+          cost: 0
+        });
       }
 
       const horoscope = await GeminiService.generateHoroscope(data, geminiApiKey);
@@ -176,9 +188,21 @@ aiServices.post('/tarotpath/generate', authMiddleware, zValidator('json', tarotP
 
     try {
       // Generate tarot reading using Gemini API
-      const geminiApiKey = c.env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY || 'AIzaSyB9QfEPqQ0yrOiMYw6bsp6-lVO6a9wCE4Q';
+      const geminiApiKey = c.env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
       if (!geminiApiKey) {
-        throw new Error('Gemini API key not configured');
+        // Return demo content when API key is not available
+        return c.json({
+          success: true,
+          message: 'Horoscope generated (Demo mode - configure GEMINI_API_KEY for real AI content)',
+          horoscope: {
+            title: `${data.zodiac_sign || 'Your'} Daily Horoscope - Demo`,
+            content: `This is a demo horoscope for ${data.zodiac_sign || 'you'}. The stars align beautifully today, bringing opportunities for growth and positive change. Trust your intuition and embrace new experiences. Configure GEMINI_API_KEY environment variable for personalized AI-powered horoscopes.`,
+            type: data.type,
+            zodiac_sign: data.zodiac_sign,
+            generated_at: new Date().toISOString()
+          },
+          cost: 0
+        });
       }
 
       const tarotReading = await GeminiService.generateTarotReading(data, geminiApiKey);
@@ -267,9 +291,21 @@ aiServices.post('/zodiac-tome/generate', authMiddleware, zValidator('json', zodi
 
     try {
       // Generate zodiac analysis using Gemini API
-      const geminiApiKey = c.env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY || 'AIzaSyB9QfEPqQ0yrOiMYw6bsp6-lVO6a9wCE4Q';
+      const geminiApiKey = c.env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
       if (!geminiApiKey) {
-        throw new Error('Gemini API key not configured');
+        // Return demo content when API key is not available
+        return c.json({
+          success: true,
+          message: 'Horoscope generated (Demo mode - configure GEMINI_API_KEY for real AI content)',
+          horoscope: {
+            title: `${data.zodiac_sign || 'Your'} Daily Horoscope - Demo`,
+            content: `This is a demo horoscope for ${data.zodiac_sign || 'you'}. The stars align beautifully today, bringing opportunities for growth and positive change. Trust your intuition and embrace new experiences. Configure GEMINI_API_KEY environment variable for personalized AI-powered horoscopes.`,
+            type: data.type,
+            zodiac_sign: data.zodiac_sign,
+            generated_at: new Date().toISOString()
+          },
+          cost: 0
+        });
       }
 
       const zodiacAnalysis = await GeminiService.generateZodiacInfo(data, geminiApiKey);
