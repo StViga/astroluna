@@ -7,6 +7,7 @@
     "dev:d1": "wrangler pages dev dist --d1=astroluna-production --local --ip 0.0.0.0 --port 3000",
     "build": "vite build",
     "build:node": "tsc src/index.tsx --outDir ./build --module ESNext --target ES2020 --jsx react --esModuleInterop --allowSyntheticDefaultImports --skipLibCheck --declaration false || echo 'Build done'",
+    "build:netlify": "npm run build && echo 'Netlify build complete'",
     "build:deploy": "./build-for-deploy.sh",
     "start": "node server.js",
     "preview": "wrangler pages dev dist",
