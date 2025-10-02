@@ -2129,12 +2129,23 @@ app.get('/login', (c) => {
               Sign In
             </button>
           </form>
-          <div className="mt-6 text-center">
-            <a href="/forgot-password" className="text-purple-400 hover:text-purple-300">Forgot Password?</a>
+          
+          {/* Test Account Info */}
+          <div className="mt-6 p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
+            <h3 className="text-green-400 font-semibold mb-2 text-sm">🌙 Test Accounts Available:</h3>
+            <div className="text-xs text-gray-300 space-y-1">
+              <div><strong>demo@astroluna.com</strong> / demo123 (150 credits)</div>
+              <div><strong>test@astroluna.com</strong> / password (100 credits)</div>
+              <div><strong>admin@astroluna.com</strong> / admin123 (500 credits)</div>
+            </div>
           </div>
+          
           <div className="mt-4 text-center">
-            <span className="text-gray-400">Don't have an account? </span>
-            <a href="/signup" className="text-purple-400 hover:text-purple-300">Sign up</a>
+            <a href="/forgot-password" className="text-purple-400 hover:text-purple-300 text-sm">Forgot Password?</a>
+          </div>
+          <div className="mt-2 text-center">
+            <span className="text-gray-400 text-sm">Don't have an account? </span>
+            <a href="/signup" className="text-purple-400 hover:text-purple-300 text-sm">Sign up</a>
           </div>
         </div>
         

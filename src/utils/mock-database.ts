@@ -12,40 +12,94 @@ let nextId = 1;
 
 export class MockDatabaseService {
   
-  // Initialize with some test data
+  // Initialize with test data - pre-hashed passwords for demo
   static async initialize() {
     if (mockUsers.length === 0) {
-      // Create test user
-      const hashedPassword = await bcrypt.hash('testpass', 10);
+      // Pre-create test users with Web Crypto hashed passwords
+      const salt1 = 'testsalt123';
+      const salt2 = 'demosalt456'; 
+      const salt3 = 'adminsalt789';
       
-      const testUser: User = {
-        id: 1,
-        email: 'test@example.com',
-        password_hash: hashedPassword,
-        full_name: 'Test User',
-        phone: '+1234567890',
-        language: 'en',
-        currency: 'EUR',
-        is_verified: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+      // Hash: demo123 + testsalt123
+      const hash1 = 'b74ff91f71caef55a5af547ac8f03c3e0dec9d6c9669bcfa23c22460dc32f151:testsalt123';
+      // Hash: password + demosalt456  
+      const hash2 = '9346cddcc214472fa19094d4f40acd0ce761758c0bab35c7585bb473b1f3550c:demosalt456';
+      // Hash: admin123 + adminsalt789
+      const hash3 = '7307f78c9244e00526debeabb074fc6b9987b2594c2da6a2ed9269aac3511b51:adminsalt789';
       
-      mockUsers.push(testUser);
+      const testUsers: User[] = [
+        {
+          id: 1,
+          email: 'demo@astroluna.com',
+          password_hash: hash1, // Password: demo123
+          full_name: 'Demo User',
+          phone: '+1234567890',
+          language: 'en',
+          currency: 'EUR',
+          is_verified: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: 2,
+          email: 'test@astroluna.com', 
+          password_hash: hash2, // Password: password
+          full_name: 'Test User',
+          phone: '+0987654321',
+          language: 'en',
+          currency: 'USD',
+          is_verified: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: 3,
+          email: 'admin@astroluna.com',
+          password_hash: hash3, // Password: admin123
+          full_name: 'Admin User',
+          phone: '+1122334455',
+          language: 'en', 
+          currency: 'GBP',
+          is_verified: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ];
       
-      // Create credits for test user
-      const testCredits: Credits = {
-        id: 1,
-        user_id: 1,
-        balance: 100,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+      mockUsers.push(...testUsers);
       
-      mockCredits.push(testCredits);
+      // Create credits for all test users
+      const testCredits: Credits[] = [
+        {
+          id: 1,
+          user_id: 1,
+          balance: 150,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: 2,
+          user_id: 2,
+          balance: 100,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: 3,
+          user_id: 3,
+          balance: 500,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ];
       
-      nextId = 2;
-      console.log('Mock database initialized with test user: test@example.com / testpass');
+      mockCredits.push(...testCredits);
+      nextId = 4;
+      
+      console.log('🌙 Mock database initialized with test accounts:');
+      console.log('📧 demo@astroluna.com / demo123 (150 credits)');
+      console.log('📧 test@astroluna.com / password (100 credits)'); 
+      console.log('📧 admin@astroluna.com / admin123 (500 credits)');
     }
   }
 
