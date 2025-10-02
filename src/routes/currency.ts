@@ -1,15 +1,15 @@
 // Currency exchange routes for AstroLuna
 
 import { Hono } from 'hono';
-import type { CloudflareBindings } from '../types/database';
+// Removed CloudflareBindings import for Node.js compatibility
 import { CurrencyService } from '../utils/currency';
 
-const currency = new Hono<{ Bindings: CloudflareBindings }>();
+const currency = new Hono();
 
 // Get current exchange rates
 currency.get('/rates', async (c) => {
   try {
-    const rates = await CurrencyService.getExchangeRates(c.env.DB);
+    const rates = await CurrencyService.getExchangeRates(c.env?.DB);
     
     return c.json({
       success: true,
@@ -34,7 +34,7 @@ currency.get('/rates', async (c) => {
 // Calculate pricing for credit packages in different currencies
 currency.get('/pricing', async (c) => {
   try {
-    const rates = await CurrencyService.getExchangeRates(c.env.DB);
+    const rates = await CurrencyService.getExchangeRates(c.env?.DB);
     
     // Define credit packages (EUR base prices)
     const packages = [
@@ -86,7 +86,7 @@ currency.post('/convert', async (c) => {
       return c.json({ error: 'Missing required parameters: amount, from_currency, to_currency' }, 400);
     }
     
-    const rates = await CurrencyService.getExchangeRates(c.env.DB);
+    const rates = await CurrencyService.getExchangeRates(c.env?.DB);
     
     // Convert to EUR first, then to target currency
     const eurAmount = CurrencyService.convertToEUR(amount, from_currency, rates);
@@ -128,7 +128,7 @@ currency.post('/checkout/quote', async (c) => {
       return c.json({ error: 'Missing required parameters: amount_eur, target_currency' }, 400);
     }
     
-    const rates = await CurrencyService.getExchangeRates(c.env.DB);
+    const rates = await CurrencyService.getExchangeRates(c.env?.DB);
     const convertedAmount = CurrencyService.convertFromEUR(amount_eur, target_currency, rates);
     
     // Create quote snapshot for this transaction

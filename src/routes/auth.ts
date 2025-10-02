@@ -3,11 +3,10 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
-import type { CloudflareBindings } from '../types/database';
 import { DatabaseService, generateToken, generateRandomToken } from '../utils/database';
 import { MockDatabaseService } from '../utils/mock-database';
 
-const auth = new Hono<{ Bindings: CloudflareBindings }>();
+const auth = new Hono();
 
 // Validation schemas
 const signupSchema = z.object({
@@ -44,18 +43,19 @@ const newPasswordSchema = z.object({
 
 // Helper function to get database service
 async function getDbService(env: any) {
-  if (env.DB) {
-    try {
-      // Test if database is properly set up by checking for users table
-      await env.DB.prepare('SELECT COUNT(*) FROM users LIMIT 1').first();
-      return new DatabaseService(env.DB);
-    } catch (error) {
-      console.log('D1 database not properly configured, using mock database:', error.message);
-      await MockDatabaseService.initialize();
-      return new MockDatabaseService();
-    }
-  } else {
-    console.log('Using mock database (D1 not available)');
+  // In non-Cloudflare environments, always use mock database
+  if (typeof env?.DB === 'undefined') {
+    console.log('Using mock database (non-Cloudflare environment)');
+    await MockDatabaseService.initialize();
+    return new MockDatabaseService();
+  }
+
+  try {
+    // Test if database is properly set up by checking for users table
+    await env.DB.prepare('SELECT COUNT(*) FROM users LIMIT 1').first();
+    return new DatabaseService(env.DB);
+  } catch (error) {
+    console.log('D1 database not properly configured, using mock database:', error.message);
     await MockDatabaseService.initialize();
     return new MockDatabaseService();
   }
@@ -84,7 +84,7 @@ auth.post('/signup', zValidator('json', signupSchema), async (c) => {
     });
 
     // Generate JWT token
-    const jwtSecret = c.env.JWT_SECRET || 'dev_secret_key_change_in_production';
+    const jwtSecret = c.env?.JWT_SECRET || process.env.JWT_SECRET || 'dev_secret_key_change_in_production';
     const token = generateToken(user.id, jwtSecret);
 
     // Return user data without password
@@ -122,7 +122,7 @@ auth.post('/login', zValidator('json', loginSchema), async (c) => {
     }
 
     // Generate JWT token
-    const jwtSecret = c.env.JWT_SECRET || 'dev_secret_key_change_in_production';
+    const jwtSecret = c.env?.JWT_SECRET || process.env.JWT_SECRET || 'dev_secret_key_change_in_production';
     const token = generateToken(user.id, jwtSecret);
 
     // Get user credits
@@ -246,7 +246,7 @@ auth.get('/profile', async (c) => {
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-    const jwtSecret = c.env.JWT_SECRET || 'dev_secret_key_change_in_production';
+    const jwtSecret = c.env?.JWT_SECRET || process.env.JWT_SECRET || 'dev_secret_key_change_in_production';
     
     // Verify token
     const jwt = await import('jsonwebtoken');

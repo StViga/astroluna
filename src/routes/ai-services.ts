@@ -3,27 +3,27 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
-import type { CloudflareBindings } from '../types/database';
 import { DatabaseService } from '../utils/database';
 import { MockDatabaseService } from '../utils/mock-database';
 import { GeminiService } from '../utils/gemini';
 import { authMiddleware, getCurrentUser, checkCredits } from '../middleware/auth';
 
-const aiServices = new Hono<{ Bindings: CloudflareBindings }>();
+const aiServices = new Hono();
 
 // Helper function to get database service
 async function getDbService(env: any) {
-  if (env.DB) {
-    try {
-      await env.DB.prepare('SELECT COUNT(*) FROM users LIMIT 1').first();
-      return new DatabaseService(env.DB);
-    } catch (error) {
-      console.log('D1 database not properly configured, using mock database:', error.message);
-      await MockDatabaseService.initialize();
-      return new MockDatabaseService();
-    }
-  } else {
-    console.log('Using mock database (D1 not available)');
+  // In non-Cloudflare environments, always use mock database
+  if (typeof env?.DB === 'undefined') {
+    console.log('Using mock database (non-Cloudflare environment)');
+    await MockDatabaseService.initialize();
+    return new MockDatabaseService();
+  }
+
+  try {
+    await env.DB.prepare('SELECT COUNT(*) FROM users LIMIT 1').first();
+    return new DatabaseService(env.DB);
+  } catch (error) {
+    console.log('D1 database not properly configured, using mock database:', error.message);
     await MockDatabaseService.initialize();
     return new MockDatabaseService();
   }
@@ -92,7 +92,7 @@ aiServices.post('/astroscope/generate', authMiddleware, zValidator('json', astro
 
     try {
       // Generate horoscope using Gemini API
-      const geminiApiKey = c.env.GEMINI_API_KEY;
+      const geminiApiKey = c.env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
       if (!geminiApiKey) {
         throw new Error('Gemini API key not configured');
       }
@@ -176,7 +176,7 @@ aiServices.post('/tarotpath/generate', authMiddleware, zValidator('json', tarotP
 
     try {
       // Generate tarot reading using Gemini API
-      const geminiApiKey = c.env.GEMINI_API_KEY;
+      const geminiApiKey = c.env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
       if (!geminiApiKey) {
         throw new Error('Gemini API key not configured');
       }
@@ -267,7 +267,7 @@ aiServices.post('/zodiac-tome/generate', authMiddleware, zValidator('json', zodi
 
     try {
       // Generate zodiac analysis using Gemini API
-      const geminiApiKey = c.env.GEMINI_API_KEY;
+      const geminiApiKey = c.env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
       if (!geminiApiKey) {
         throw new Error('Gemini API key not configured');
       }

@@ -1,7 +1,6 @@
 // Authentication middleware for AstroLuna
 
 import type { Context, Next } from 'hono';
-import type { CloudflareBindings } from '../types/database';
 import { verifyToken } from '../utils/database';
 
 export interface AuthContext {
@@ -10,7 +9,7 @@ export interface AuthContext {
 }
 
 // Middleware to verify JWT token and add user context
-export async function authMiddleware(c: Context<{ Bindings: CloudflareBindings }>, next: Next) {
+export async function authMiddleware(c: Context, next: Next) {
   try {
     // Extract JWT token from Authorization header
     const authHeader = c.req.header('Authorization');
@@ -20,7 +19,7 @@ export async function authMiddleware(c: Context<{ Bindings: CloudflareBindings }
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-    const jwtSecret = c.env.JWT_SECRET || 'dev_secret_key_change_in_production';
+    const jwtSecret = c.env?.JWT_SECRET || process.env.JWT_SECRET || 'dev_secret_key_change_in_production';
     
     // Verify token
     const decoded = verifyToken(token, jwtSecret);
@@ -40,13 +39,13 @@ export async function authMiddleware(c: Context<{ Bindings: CloudflareBindings }
 }
 
 // Optional middleware that allows both authenticated and unauthenticated requests
-export async function optionalAuthMiddleware(c: Context<{ Bindings: CloudflareBindings }>, next: Next) {
+export async function optionalAuthMiddleware(c: Context, next: Next) {
   try {
     const authHeader = c.req.header('Authorization');
     
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
-      const jwtSecret = c.env.JWT_SECRET || 'dev_secret_key_change_in_production';
+      const jwtSecret = c.env?.JWT_SECRET || process.env.JWT_SECRET || 'dev_secret_key_change_in_production';
       
       const decoded = verifyToken(token, jwtSecret);
       

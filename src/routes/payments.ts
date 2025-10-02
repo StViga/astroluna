@@ -3,14 +3,14 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
-import type { CloudflareBindings } from '../types/database';
+// Removed CloudflareBindings import for Node.js compatibility
 import { DatabaseService } from '../utils/database';
 import { MockDatabaseService } from '../utils/mock-database';
 import { CurrencyService } from '../utils/currency';
 import { SPCPaymentService } from '../utils/payment';
 import { authMiddleware, getCurrentUser } from '../middleware/auth';
 
-const payments = new Hono<{ Bindings: CloudflareBindings }>();
+const payments = new Hono();
 
 // Helper function to get database service
 async function getDbService(env: any) {
@@ -92,16 +92,20 @@ payments.post('/checkout/init', authMiddleware, zValidator('json', checkoutInitS
 
     // Check if SPC credentials are configured and valid
     // For demo purposes, we'll consider credentials invalid if they contain placeholder values
-    const hasValidSPCCredentials = c.env.SPC_TERMINAL_ID && c.env.SPC_PUB_KEY && c.env.SPC_SEC_KEY &&
-      !c.env.SPC_TERMINAL_ID.includes('placeholder') &&
-      !c.env.SPC_PUB_KEY.includes('placeholder') &&
-      !c.env.SPC_SEC_KEY.includes('SEC-AA'); // This looks like a placeholder key
+    const spcTerminalId = c.env?.SPC_TERMINAL_ID || process.env.SPC_TERMINAL_ID;
+    const spcPubKey = c.env?.SPC_PUB_KEY || process.env.SPC_PUB_KEY;
+    const spcSecKey = c.env?.SPC_SEC_KEY || process.env.SPC_SEC_KEY;
+    
+    const hasValidSPCCredentials = spcTerminalId && spcPubKey && spcSecKey &&
+      !spcTerminalId.includes('placeholder') &&
+      !spcPubKey.includes('placeholder') &&
+      !spcSecKey.includes('SEC-AA'); // This looks like a placeholder key
     
     console.log('SPC Credentials check:', {
       hasValidSPCCredentials,
-      hasTerminal: !!c.env.SPC_TERMINAL_ID,
-      hasPubKey: !!c.env.SPC_PUB_KEY,
-      hasSecKey: !!c.env.SPC_SEC_KEY,
+      hasTerminal: !!spcTerminalId,
+      hasPubKey: !!spcPubKey,
+      hasSecKey: !!spcSecKey,
       usingDemoMode: !hasValidSPCCredentials
     });
     
@@ -110,9 +114,9 @@ payments.post('/checkout/init', authMiddleware, zValidator('json', checkoutInitS
     if (hasValidSPCCredentials) {
       // Use real SPC payment gateway
       paymentResult = await SPCPaymentService.createPaymentWidget(paymentRequest, {
-        SPC_TERMINAL_ID: c.env.SPC_TERMINAL_ID,
-        SPC_PUB_KEY: c.env.SPC_PUB_KEY,
-        SPC_SEC_KEY: c.env.SPC_SEC_KEY,
+        SPC_TERMINAL_ID: spcTerminalId,
+        SPC_PUB_KEY: spcPubKey,
+        SPC_SEC_KEY: spcSecKey,
         BASE_URL: c.env.BASE_URL || 'http://localhost:3000'
       });
     } else {

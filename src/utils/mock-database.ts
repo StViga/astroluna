@@ -1,7 +1,7 @@
 // Mock database service for development when D1 is not available
 
 import type { User, Credits, Transaction } from '../types/database';
-import bcrypt from 'bcryptjs';
+// Using simple password hashing for demo (works in both Node.js and Cloudflare)
 import jwt from 'jsonwebtoken';
 
 // In-memory storage for development
@@ -57,7 +57,15 @@ export class MockDatabaseService {
     language?: string;
     currency?: string;
   }): Promise<User> {
-    const password_hash = await bcrypt.hash(userData.password, 10);
+    console.log('Creating user with password:', typeof userData.password, userData.password);
+    // Simple password hashing for demo (use proper bcrypt in production)
+    const salt = Math.random().toString(36).substring(2, 15);
+    const encoder = new TextEncoder();
+    const data = encoder.encode(userData.password + salt);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const password_hash = hashHex + ':' + salt;
     
     const user: User = {
       id: nextId++,
@@ -97,7 +105,16 @@ export class MockDatabaseService {
   }
 
   async verifyPassword(password: string, hash: string): Promise<boolean> {
-    return await bcrypt.compare(password, hash);
+    if (!hash.includes(':')) return false;
+    const [hashedPassword, salt] = hash.split(':');
+    
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password + salt);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const testHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    return testHash === hashedPassword;
   }
 
   async getUserCredits(userId: number): Promise<number> {
