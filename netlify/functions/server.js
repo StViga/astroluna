@@ -1,5 +1,5 @@
-// Netlify serverless function for AstroLuna
-import app from '../../app.js'
+// Netlify serverless function for AstroLuna (CommonJS)
+const { default: app } = require('../../dist/_worker.js')
 
 export const handler = async (event, context) => {
   // Build URL with query parameters
