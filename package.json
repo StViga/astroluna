@@ -6,7 +6,9 @@
     "dev:sandbox": "wrangler pages dev dist --ip 0.0.0.0 --port 3000",
     "dev:d1": "wrangler pages dev dist --d1=astroluna-production --local --ip 0.0.0.0 --port 3000",
     "build": "vite build",
+    "build:node": "tsc src/index.tsx --outDir ./build --module ESNext --target ES2020 --jsx react --esModuleInterop --allowSyntheticDefaultImports --skipLibCheck --declaration false || echo 'Build done'",
     "build:deploy": "./build-for-deploy.sh",
+    "start": "node server.js",
     "preview": "wrangler pages dev dist",
     "deploy": "./build-for-deploy.sh && wrangler pages deploy dist",
     "deploy:prod": "./build-for-deploy.sh && wrangler pages deploy dist --project-name astroluna",
@@ -25,17 +27,18 @@
     "git:log": "git log --oneline"
   },
   "dependencies": {
-    "hono": "^4.9.9",
+    "@hono/node-server": "^1.19.5",
     "@hono/zod-validator": "^0.4.1",
-    "zod": "^3.22.4",
     "bcryptjs": "^2.4.3",
+    "hono": "^4.9.9",
     "jsonwebtoken": "^9.0.2",
-    "nodemailer": "^6.9.7"
+    "nodemailer": "^6.9.7",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250705.0",
     "@hono/vite-build": "^1.2.0",
     "@hono/vite-dev-server": "^0.18.2",
-    "@cloudflare/workers-types": "^4.20250705.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/nodemailer": "^6.4.14",

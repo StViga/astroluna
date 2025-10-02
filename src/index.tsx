@@ -3,9 +3,7 @@ import { renderer } from './renderer'
 import { corsMiddleware, rateLimit } from './middleware/auth'
 import authRoutes from './routes/auth'
 import currencyRoutes from './routes/currency'
-import type { CloudflareBindings } from './types/database'
-
-const app = new Hono<{ Bindings: CloudflareBindings }>()
+const app = new Hono()
 
 // Apply CORS middleware to all routes
 app.use('*', corsMiddleware)
