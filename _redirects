@@ -1,9 +1,8 @@
 # Cloudflare Pages redirects for Hono application
-# This ensures all routes are handled by the Hono Worker
+# All routes handled by Worker, static assets served directly
 
-# API routes - handled by Worker
-/api/* 200
+# Static assets - served directly by Pages
 /static/* 200
 
-# All other routes - handled by Worker  
+# All other routes (including root /) - handled by Worker
 /* 200
