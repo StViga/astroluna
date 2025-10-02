@@ -92,7 +92,7 @@ aiServices.post('/astroscope/generate', authMiddleware, zValidator('json', astro
 
     try {
       // Generate horoscope using Gemini API
-      const geminiApiKey = c.env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+      const geminiApiKey = c.env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY || 'AIzaSyB9QfEPqQ0yrOiMYw6bsp6-lVO6a9wCE4Q';
       if (!geminiApiKey) {
         throw new Error('Gemini API key not configured');
       }
@@ -176,7 +176,7 @@ aiServices.post('/tarotpath/generate', authMiddleware, zValidator('json', tarotP
 
     try {
       // Generate tarot reading using Gemini API
-      const geminiApiKey = c.env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+      const geminiApiKey = c.env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY || 'AIzaSyB9QfEPqQ0yrOiMYw6bsp6-lVO6a9wCE4Q';
       if (!geminiApiKey) {
         throw new Error('Gemini API key not configured');
       }
@@ -267,7 +267,7 @@ aiServices.post('/zodiac-tome/generate', authMiddleware, zValidator('json', zodi
 
     try {
       // Generate zodiac analysis using Gemini API
-      const geminiApiKey = c.env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+      const geminiApiKey = c.env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY || 'AIzaSyB9QfEPqQ0yrOiMYw6bsp6-lVO6a9wCE4Q';
       if (!geminiApiKey) {
         throw new Error('Gemini API key not configured');
       }

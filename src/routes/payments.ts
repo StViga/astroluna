@@ -92,9 +92,9 @@ payments.post('/checkout/init', authMiddleware, zValidator('json', checkoutInitS
 
     // Check if SPC credentials are configured and valid
     // For demo purposes, we'll consider credentials invalid if they contain placeholder values
-    const spcTerminalId = c.env?.SPC_TERMINAL_ID || process.env.SPC_TERMINAL_ID;
-    const spcPubKey = c.env?.SPC_PUB_KEY || process.env.SPC_PUB_KEY;
-    const spcSecKey = c.env?.SPC_SEC_KEY || process.env.SPC_SEC_KEY;
+    const spcTerminalId = c.env?.SPC_TERMINAL_ID || process.env.SPC_TERMINAL_ID || 'demo_terminal_id';
+    const spcPubKey = c.env?.SPC_PUB_KEY || process.env.SPC_PUB_KEY || 'demo_pub_key';
+    const spcSecKey = c.env?.SPC_SEC_KEY || process.env.SPC_SEC_KEY || 'SEC-AA_demo_key';
     
     const hasValidSPCCredentials = spcTerminalId && spcPubKey && spcSecKey &&
       !spcTerminalId.includes('placeholder') &&

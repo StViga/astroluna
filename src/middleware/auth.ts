@@ -19,7 +19,7 @@ export async function authMiddleware(c: Context, next: Next) {
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-    const jwtSecret = c.env?.JWT_SECRET || process.env.JWT_SECRET || 'dev_secret_key_change_in_production';
+    const jwtSecret = c.env?.JWT_SECRET || process.env.JWT_SECRET || 'demo_jwt_secret_astroluna_2024';
     
     // Verify token
     const decoded = verifyToken(token, jwtSecret);
@@ -45,7 +45,7 @@ export async function optionalAuthMiddleware(c: Context, next: Next) {
     
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
-      const jwtSecret = c.env?.JWT_SECRET || process.env.JWT_SECRET || 'dev_secret_key_change_in_production';
+      const jwtSecret = c.env?.JWT_SECRET || process.env.JWT_SECRET || 'demo_jwt_secret_astroluna_2024';
       
       const decoded = verifyToken(token, jwtSecret);
       

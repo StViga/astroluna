@@ -1,10 +1,14 @@
 import { serve } from '@hono/node-server'
 import { serveStatic } from '@hono/node-server/serve-static'
-import dotenv from 'dotenv'
 import app from './app.js'
 
-// Load environment variables
-dotenv.config()
+// Load environment variables if available (optional)
+try {
+  const dotenv = await import('dotenv')
+  dotenv.config()
+} catch (e) {
+  console.log('dotenv not available, using environment variables directly')
+}
 
 // Add static file serving for Node.js
 app.use('/static/*', serveStatic({ root: './public' }))

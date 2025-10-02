@@ -84,7 +84,7 @@ auth.post('/signup', zValidator('json', signupSchema), async (c) => {
     });
 
     // Generate JWT token
-    const jwtSecret = c.env?.JWT_SECRET || process.env.JWT_SECRET || 'dev_secret_key_change_in_production';
+    const jwtSecret = c.env?.JWT_SECRET || process.env.JWT_SECRET || 'demo_jwt_secret_astroluna_2024';
     const token = generateToken(user.id, jwtSecret);
 
     // Return user data without password
@@ -122,7 +122,7 @@ auth.post('/login', zValidator('json', loginSchema), async (c) => {
     }
 
     // Generate JWT token
-    const jwtSecret = c.env?.JWT_SECRET || process.env.JWT_SECRET || 'dev_secret_key_change_in_production';
+    const jwtSecret = c.env?.JWT_SECRET || process.env.JWT_SECRET || 'demo_jwt_secret_astroluna_2024';
     const token = generateToken(user.id, jwtSecret);
 
     // Get user credits
@@ -246,7 +246,7 @@ auth.get('/profile', async (c) => {
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-    const jwtSecret = c.env?.JWT_SECRET || process.env.JWT_SECRET || 'dev_secret_key_change_in_production';
+    const jwtSecret = c.env?.JWT_SECRET || process.env.JWT_SECRET || 'demo_jwt_secret_astroluna_2024';
     
     // Verify token
     const jwt = await import('jsonwebtoken');
