@@ -112,22 +112,14 @@ export class MockDatabaseService {
     currency?: string;
   }): Promise<User> {
     console.log('Creating user with password:', typeof userData.password, userData.password);
-    // Simple password hashing for demo
+    // Simple password hashing for demo (use proper bcrypt in production)
     const salt = Math.random().toString(36).substring(2, 15);
-    let password_hash;
-    
-    try {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(userData.password + salt);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      password_hash = hashHex + ':' + salt;
-    } catch (error) {
-      console.error('Crypto error, using simple hash:', error);
-      // Fallback simple hash for compatibility
-      password_hash = btoa(userData.password + salt) + ':' + salt;
-    }
+    const encoder = new TextEncoder();
+    const data = encoder.encode(userData.password + salt);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const password_hash = hashHex + ':' + salt;
     
     const user: User = {
       id: nextId++,
@@ -170,21 +162,13 @@ export class MockDatabaseService {
     if (!hash.includes(':')) return false;
     const [hashedPassword, salt] = hash.split(':');
     
-    try {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(password + salt);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const testHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      
-      return testHash === hashedPassword;
-    } catch (error) {
-      console.error('Password verification error:', error);
-      // Fallback to simple comparison for debugging
-      return password === 'demo123' && hash.includes('testsalt123') ||
-             password === 'password' && hash.includes('demosalt456') ||
-             password === 'admin123' && hash.includes('adminsalt789');
-    }
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password + salt);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const testHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    return testHash === hashedPassword;
   }
 
   async getUserCredits(userId: number): Promise<number> {

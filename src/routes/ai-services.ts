@@ -109,20 +109,7 @@ aiServices.post('/astroscope/generate', authMiddleware, zValidator('json', astro
         });
       }
 
-      let horoscope;
-      try {
-        horoscope = await GeminiService.generateHoroscope(data, geminiApiKey);
-      } catch (apiError) {
-        console.error('Gemini API error, using fallback content:', apiError);
-        // Fallback to demo content if API fails
-        horoscope = {
-          title: `${data.zodiac_sign || 'Your'} Daily Horoscope - Demo`,
-          content: `This is a demo horoscope for ${data.zodiac_sign || 'you'}. The stars align beautifully today, bringing opportunities for growth and positive change. Trust your intuition and embrace new experiences. (Note: Gemini API temporarily unavailable)`,
-          type: data.type,
-          zodiac_sign: data.zodiac_sign,
-          generated_at: new Date().toISOString()
-        };
-      }
+      const horoscope = await GeminiService.generateHoroscope(data, geminiApiKey);
 
       // Save generated content to library
       const content = await db.saveContent({
@@ -218,23 +205,7 @@ aiServices.post('/tarotpath/generate', authMiddleware, zValidator('json', tarotP
         });
       }
 
-      let tarotReading;
-      try {
-        tarotReading = await GeminiService.generateTarotReading(data, geminiApiKey);
-      } catch (apiError) {
-        console.error('Gemini API error for tarot, using fallback:', apiError);
-        tarotReading = {
-          title: "Demo Tarot Reading",
-          cards: data.selected_cards?.map((cardNum, index) => ({
-            position: index + 1,
-            card_name: `Card ${cardNum}`,
-            meaning: `This is a demo interpretation for card ${cardNum}. Trust your intuition and embrace the guidance.`,
-            upright: true
-          })) || [],
-          interpretation: "This is a demo tarot reading. The cards suggest a time of reflection and growth. (Note: Gemini API temporarily unavailable)",
-          generated_at: new Date().toISOString()
-        };
-      }
+      const tarotReading = await GeminiService.generateTarotReading(data, geminiApiKey);
 
       // Save generated content to library
       const content = await db.saveContent({
