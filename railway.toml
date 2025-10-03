@@ -1,13 +1,15 @@
 [build]
-cmd = "npm install && npm run build"
+cmd = "npm run install:all && npm run build"
 
 [deploy]
-startCommand = "npm start"
-healthcheckPath = "/"
-healthcheckTimeout = 100
+startCommand = "npm run start:railway"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 120
 restartPolicyType = "on_failure"
-restartPolicyMaxRetries = 3
+restartPolicyMaxRetries = 5
 
 [variables]
 NODE_ENV = "production"
-PORT = "3000"
+PORT = "$PORT"
+HOST = "0.0.0.0"
+RAILWAY = "true"

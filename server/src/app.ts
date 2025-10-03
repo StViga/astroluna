@@ -11,6 +11,7 @@ import { Database } from './config/database';
 // Import routes
 import authRoutes from './routes/auth';
 import aiRoutes from './routes/ai';
+import healthRoutes from './routes/health';
 
 // Import middleware
 import { authenticate } from './middleware/auth';
@@ -77,16 +78,9 @@ app.use(cookieParser());
 // Request logging
 app.use(requestLogger);
 
-// Health check endpoint (before rate limiting)
-app.get('/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'AstroLuna API Server is running',
-    timestamp: new Date().toISOString(),
-    version: process.env.API_VERSION || '1.0.0',
-    environment: process.env.NODE_ENV || 'development'
-  });
-});
+// Health check endpoints (before rate limiting)
+app.use('/api', healthRoutes);
+app.use('/', healthRoutes);
 
 // API routes with rate limiting
 app.use('/api', apiRateLimit);

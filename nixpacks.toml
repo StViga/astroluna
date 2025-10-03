@@ -1,0 +1,24 @@
+[variables]
+NODE_VERSION = "18"
+NPM_CONFIG_PRODUCTION = "false"
+
+[phases.setup]
+nixPkgs = ["nodejs-18_x", "npm-9_x"]
+
+[phases.install]
+cmds = [
+    "npm config set fund false",
+    "npm config set audit false", 
+    "npm install",
+    "cd server && npm install",
+    "cd client && npm install"
+]
+
+[phases.build]
+cmds = [
+    "npm run client:build",
+    "npm run server:build"
+]
+
+[start]
+cmd = "npm run start:railway"

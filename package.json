@@ -12,12 +12,15 @@
     "client:build": "cd client && npm run build",
     "start": "cd server && npm start",
     "start:railway": "cd server && npm run start:railway",
+    "railway:build": "npm run install:all && npm run build",
+    "railway:start": "npm run start:railway",
     "test": "cd server && npm test && cd ../client && npm test",
     "db:setup": "cd server && npm run db:setup",
     "db:migrate": "cd server && npm run db:migrate",
     "db:seed": "cd server && npm run db:seed",
+    "db:reset": "cd server && npm run db:reset",
     "install:all": "npm install && cd server && npm install && cd ../client && npm install",
-    "postinstall": "npm run install:all"
+    "postinstall": "echo 'Root dependencies installed'"
   },
   "workspaces": [
     "server",

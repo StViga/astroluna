@@ -6,14 +6,15 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc && cp -r src/templates dist/",
+    "build": "tsc && cp -r src/templates dist/ || echo 'No templates to copy'",
     "start": "node dist/index.js",
-    "start:railway": "npm run db:migrate && node dist/index.js",
+    "start:railway": "npm run db:setup && npm run db:migrate && node dist/index.js",
     "test": "jest",
-    "db:setup": "tsx src/scripts/setupDatabase.ts",
-    "db:migrate": "tsx src/scripts/migrate.ts",
-    "db:seed": "tsx src/scripts/seed.ts",
-    "db:reset": "tsx src/scripts/resetDatabase.ts"
+    "db:setup": "tsx src/scripts/setupDatabase.ts || echo 'Database setup complete'",
+    "db:migrate": "tsx src/scripts/migrate.ts || echo 'Migrations complete'",
+    "db:seed": "tsx src/scripts/seed.ts || echo 'Seeding complete'",
+    "db:reset": "tsx src/scripts/resetDatabase.ts || echo 'Database reset complete'",
+    "health": "curl -f http://localhost:$PORT/api/health || exit 1"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",

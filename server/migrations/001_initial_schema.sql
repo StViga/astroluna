@@ -1,89 +1,135 @@
--- AstroLuna Database Schema
--- Initial migration for PostgreSQL on Railway
-
--- Enable UUID extension for better primary keys
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- Initial schema for AstroLuna platform
+-- Created for Railway deployment
 
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(255) NOT NULL,
     phone VARCHAR(20),
-    language VARCHAR(10) DEFAULT 'en',
-    currency VARCHAR(3) DEFAULT 'USD',
-    is_verified BOOLEAN DEFAULT FALSE,
+    is_email_verified BOOLEAN DEFAULT FALSE,
     email_verification_token VARCHAR(255),
     password_reset_token VARCHAR(255),
     password_reset_expires TIMESTAMP,
+    language VARCHAR(10) DEFAULT 'en',
+    currency VARCHAR(10) DEFAULT 'USD',
+    credits INTEGER DEFAULT 100,
+    subscription_type VARCHAR(50) DEFAULT 'free',
+    subscription_expires TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP
+);
+
+-- User profiles table for astrological data
+CREATE TABLE IF NOT EXISTS user_profiles (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    birth_date DATE,
+    birth_time TIME,
+    birth_place VARCHAR(255),
+    birth_latitude DECIMAL(10, 8),
+    birth_longitude DECIMAL(11, 8),
+    time_zone VARCHAR(50),
+    sun_sign VARCHAR(50),
+    moon_sign VARCHAR(50),
+    rising_sign VARCHAR(50),
+    is_birth_data_verified BOOLEAN DEFAULT FALSE,
+    preferences JSONB DEFAULT '{}',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Credits table for user balance tracking
-CREATE TABLE IF NOT EXISTS credits (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    balance INTEGER DEFAULT 100, -- Starting credits
-    total_earned INTEGER DEFAULT 100,
-    total_spent INTEGER DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(user_id)
-);
-
--- Credit transactions for audit trail
-CREATE TABLE IF NOT EXISTS credit_transactions (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    type VARCHAR(50) NOT NULL, -- 'earned', 'spent', 'refunded'
-    amount INTEGER NOT NULL,
-    description TEXT,
-    service_used VARCHAR(100), -- 'astroscope', 'tarotpath', 'zodictome'
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- AI generations tracking
+-- AI generations table
 CREATE TABLE IF NOT EXISTS ai_generations (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    service VARCHAR(50) NOT NULL, -- 'astroscope', 'tarotpath', 'zodictome'
-    input_data JSONB,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    generation_type VARCHAR(50) NOT NULL, -- natal, compatibility, forecast
+    input_data JSONB NOT NULL,
     output_data JSONB,
-    credits_used INTEGER NOT NULL,
+    credits_used INTEGER DEFAULT 1,
+    status VARCHAR(20) DEFAULT 'pending', -- pending, completed, failed
+    error_message TEXT,
     processing_time_ms INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP
+);
+
+-- User library table for saved content
+CREATE TABLE IF NOT EXISTS user_library (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    generation_id UUID REFERENCES ai_generations(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    content JSONB NOT NULL,
+    tags VARCHAR(255)[],
+    is_favorite BOOLEAN DEFAULT FALSE,
+    is_public BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Subscriptions table
+CREATE TABLE IF NOT EXISTS subscriptions (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    plan_id VARCHAR(50) NOT NULL,
+    status VARCHAR(20) NOT NULL, -- active, past_due, cancelled, unpaid
+    current_period_start TIMESTAMP NOT NULL,
+    current_period_end TIMESTAMP NOT NULL,
+    cancel_at_period_end BOOLEAN DEFAULT FALSE,
+    stripe_subscription_id VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Payment transactions table
+CREATE TABLE IF NOT EXISTS transactions (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    subscription_id UUID REFERENCES subscriptions(id) ON DELETE SET NULL,
+    transaction_type VARCHAR(50) NOT NULL, -- subscription, token_purchase, refund
+    amount DECIMAL(10, 2) NOT NULL,
+    currency VARCHAR(10) NOT NULL,
+    status VARCHAR(20) NOT NULL, -- pending, completed, failed, refunded
+    payment_method VARCHAR(50),
+    gateway_transaction_id VARCHAR(255),
+    gateway_response JSONB,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP
+);
+
+-- Token purchases table
+CREATE TABLE IF NOT EXISTS token_purchases (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    transaction_id UUID REFERENCES transactions(id) ON DELETE SET NULL,
+    package_id VARCHAR(50) NOT NULL,
+    tokens_purchased INTEGER NOT NULL,
+    bonus_tokens INTEGER DEFAULT 0,
+    amount_paid DECIMAL(10, 2) NOT NULL,
+    currency VARCHAR(10) NOT NULL,
+    status VARCHAR(20) NOT NULL, -- pending, completed, failed
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- User sessions for JWT token management
-CREATE TABLE IF NOT EXISTS user_sessions (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    token_id VARCHAR(255) UNIQUE NOT NULL,
-    refresh_token VARCHAR(500),
-    expires_at TIMESTAMP NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    last_used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    ip_address INET,
-    user_agent TEXT
-);
-
--- Indexes for performance
+-- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_users_verification_token ON users(email_verification_token);
-CREATE INDEX IF NOT EXISTS idx_users_reset_token ON users(password_reset_token);
-CREATE INDEX IF NOT EXISTS idx_credits_user_id ON credits(user_id);
-CREATE INDEX IF NOT EXISTS idx_credit_transactions_user_id ON credit_transactions(user_id);
-CREATE INDEX IF NOT EXISTS idx_credit_transactions_created_at ON credit_transactions(created_at);
+CREATE INDEX IF NOT EXISTS idx_users_subscription_type ON users(subscription_type);
+CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id);
 CREATE INDEX IF NOT EXISTS idx_ai_generations_user_id ON ai_generations(user_id);
-CREATE INDEX IF NOT EXISTS idx_ai_generations_service ON ai_generations(service);
-CREATE INDEX IF NOT EXISTS idx_ai_generations_created_at ON ai_generations(created_at);
-CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_sessions_token_id ON user_sessions(token_id);
-CREATE INDEX IF NOT EXISTS idx_user_sessions_expires_at ON user_sessions(expires_at);
+CREATE INDEX IF NOT EXISTS idx_ai_generations_status ON ai_generations(status);
+CREATE INDEX IF NOT EXISTS idx_user_library_user_id ON user_library(user_id);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status);
+CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status);
+CREATE INDEX IF NOT EXISTS idx_token_purchases_user_id ON token_purchases(user_id);
 
--- Triggers for updated_at timestamps
+-- Update triggers for updated_at columns
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -95,31 +141,11 @@ $$ language 'plpgsql';
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_credits_updated_at BEFORE UPDATE ON credits
+CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON user_profiles
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Insert demo user for testing (password: demo123)
-INSERT INTO users (email, password_hash, full_name, is_verified) 
-VALUES (
-    'demo@astroluna.com', 
-    '$2a$10$9cMOhvBHPgp.9Yh9GpoHDe4.Ex9XiC4.kEC/rPeaHw37YcVEpvve.', 
-    'Demo User', 
-    TRUE
-) ON CONFLICT (email) DO NOTHING;
+CREATE TRIGGER update_user_library_updated_at BEFORE UPDATE ON user_library
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Insert demo credits
-INSERT INTO credits (user_id, balance, total_earned) 
-SELECT id, 500, 500 FROM users WHERE email = 'demo@astroluna.com'
-ON CONFLICT (user_id) DO NOTHING;
-
--- Clean up old sessions periodically (can be run as a cron job)
-CREATE OR REPLACE FUNCTION cleanup_expired_sessions()
-RETURNS INTEGER AS $$
-DECLARE
-    deleted_count INTEGER;
-BEGIN
-    DELETE FROM user_sessions WHERE expires_at < CURRENT_TIMESTAMP;
-    GET DIAGNOSTICS deleted_count = ROW_COUNT;
-    RETURN deleted_count;
-END;
-$$ LANGUAGE plpgsql;
+CREATE TRIGGER update_subscriptions_updated_at BEFORE UPDATE ON subscriptions
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
