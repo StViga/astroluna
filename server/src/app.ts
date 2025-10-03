@@ -10,9 +10,10 @@ import { Database } from './config/database';
 
 // Import routes
 import authRoutes from './routes/auth';
+import aiRoutes from './routes/ai';
 
 // Import middleware
-import { authenticateToken } from './middleware/auth';
+import { authenticate } from './middleware/auth';
 import { apiRateLimit } from './middleware/rateLimiting';
 
 const app = express();
@@ -96,8 +97,8 @@ app.use('/api/auth', authRoutes);
 // Protected API routes (require authentication)
 app.use('/api/protected', authenticateToken);
 
-// AI generation routes (will be implemented)
-// app.use('/api/ai', authenticateToken, aiRoutes);
+// AI generation routes  
+app.use('/api/ai', aiRoutes);
 
 // Library routes (will be implemented)  
 // app.use('/api/library', authenticateToken, libraryRoutes);

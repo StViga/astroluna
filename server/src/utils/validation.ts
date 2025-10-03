@@ -249,6 +249,41 @@ export function validateBirthDate(dateString: string): boolean {
   }
 }
 
+// AI Generation validation schemas
+export const horoscopeGenerationSchema = z.object({
+  zodiacSign: z.string().min(1).max(50).optional(),
+  birthDate: z.string().optional().refine((date) => {
+    if (!date) return true;
+    return validateBirthDate(date);
+  }, 'Invalid birth date'),
+  birthTime: z.string().optional(),
+  birthPlace: z.string().max(200).optional(),
+  type: z.enum(['daily', 'weekly', 'monthly', 'compatibility']),
+  partnerSign: z.string().min(1).max(50).optional()
+});
+
+export const tarotGenerationSchema = z.object({
+  question: z.string().max(500).optional(),
+  spread: z.enum(['single', 'three-card', 'celtic-cross', 'five-card']),
+  cards: z.array(z.string()).optional()
+});
+
+export const zodiacGenerationSchema = z.object({
+  sign: z.string().min(1).max(50),
+  query: z.string().min(1).max(500),
+  type: z.enum(['personality', 'compatibility', 'career', 'love'])
+});
+
+// Zodiac signs validation
+const zodiacSigns = [
+  'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+  'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
+];
+
+export function validateZodiacSign(sign: string): boolean {
+  return zodiacSigns.includes(sign);
+}
+
 // Time validation (24-hour format)
 export function validateTime(timeString: string): boolean {
   const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;

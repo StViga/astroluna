@@ -379,6 +379,18 @@ export class SystemLogger {
       timestamp: new Date().toISOString()
     });
   }
+  
+  static aiGeneration(userId: number, service: string, creditsUsed: number, processingTime: number) {
+    logger.info('AI generation completed', {
+      domain: 'ai',
+      action: 'generation_complete',
+      userId,
+      service,
+      creditsUsed,
+      processingTime,
+      timestamp: new Date().toISOString()
+    });
+  }
 }
 
 // Request logging middleware

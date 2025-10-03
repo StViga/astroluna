@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { Database } from '../config/database.js';
+import { UserData, CreateUserData, LoginCredentials } from '../types/auth.js';
 
 // Simple logger fallback
 const logger = {
@@ -8,36 +9,6 @@ const logger = {
     console.error(`[USER MODEL ERROR] ${message}`, data);
   }
 };
-
-export interface UserData {
-  id: number;
-  email: string;
-  password_hash?: string;
-  full_name: string;
-  phone?: string;
-  language: string;
-  currency: string;
-  is_verified: boolean;
-  email_verification_token?: string;
-  password_reset_token?: string;
-  password_reset_expires?: Date;
-  created_at: Date;
-  updated_at: Date;
-}
-
-export interface CreateUserData {
-  email: string;
-  password: string;
-  full_name: string;
-  phone?: string;
-  language?: string;
-  currency?: string;
-}
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
 
 export class User {
   private db = Database.getInstance();
