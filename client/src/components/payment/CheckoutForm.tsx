@@ -47,7 +47,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
     return null;
   }
 
-  const price = convertPrice(plan.price[billingPeriod], plan.currency, selectedCurrency);
+  const price = convertPrice(plan.price[billingPeriod], plan.currency);
   const currency = selectedCurrency;
 
   // Test card data
@@ -113,9 +113,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         billingPeriod
       };
 
-      const result = await processPayment(paymentRequest);
+      const result = await processPayment('mock_payment_id', paymentRequest);
       
-      if (result.success) {
+      if (result) {
         onSuccess?.();
       }
     } catch (error) {
@@ -334,7 +334,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
             variant="outline"
             size="lg"
             className="flex-1 border-white text-white hover:bg-white hover:text-gray-800"
-            onClick={onCancel}
+            onClick={onCancel || (() => {})}
             disabled={paymentInProgress}
           >
             Cancel

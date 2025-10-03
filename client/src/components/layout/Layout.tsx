@@ -23,11 +23,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
   }, [initialized, initializeAuth]);
 
-  // Close sidebar on route change (mobile)
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [location]);
-
   // Determine layout type based on route
   const isAuthPage = location.pathname.startsWith('/auth') || 
                     location.pathname === '/login' || 
@@ -42,6 +37,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       location.pathname.startsWith('/pricing') ||
                       location.pathname.startsWith('/about') ||
                       location.pathname.startsWith('/contact');
+
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location]);
+
+  // Handle authentication redirects
+  useEffect(() => {
+    if (initialized && isDashboard && !isAuthenticated) {
+      navigate('/login');
+    }
+  }, [initialized, isDashboard, isAuthenticated, navigate]);
 
   // Show loading state during initialization
   if (!initialized) {
@@ -111,10 +118,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   // Dashboard layout (authenticated users)
   if (isDashboard) {
-    // Redirect to login if not authenticated
+    // Show loading while redirecting unauthenticated users
     if (!isAuthenticated) {
-      navigate('/login');
-      return null;
+      return (
+        <div className="min-h-screen bg-gradient-cosmic flex items-center justify-center">
+          <div className="text-center text-white">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+            <p className="text-lg font-medium">Redirecting...</p>
+          </div>
+        </div>
+      );
     }
 
     return (

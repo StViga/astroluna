@@ -1,6 +1,13 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import Database from '../config/database.js';
+import { Database } from '../config/database.js';
+
+// Simple logger fallback
+const logger = {
+  error: (message: string, data?: any) => {
+    console.error(`[USER MODEL ERROR] ${message}`, data);
+  }
+};
 
 export interface UserData {
   id: number;
@@ -33,34 +40,56 @@ export interface LoginCredentials {
 }
 
 export class User {
-  private db = Database;
+  private db = Database.getInstance();
 
   async create(userData: CreateUserData): Promise<UserData> {
-    const { email, password, full_name, phone, language = 'en', currency = 'EUR' } = userData;
+    const { email, password, full_name, phone, language = 'en', currency = 'USD' } = userData;
     
     // Hash password
-    const password_hash = await bcrypt.hash(password, 10);
+    const password_hash = await bcrypt.hash(password, 12); // Increased rounds for security
     
     // Generate verification token
     const email_verification_token = crypto.randomBytes(32).toString('hex');
 
-    const query = `
-      INSERT INTO users (email, password_hash, full_name, phone, language, currency, email_verification_token)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING id, email, full_name, phone, language, currency, is_verified, created_at, updated_at
-    `;
+    const client = await this.db.getClient();
     
-    const result = await this.db.query(query, [
-      email, password_hash, full_name, phone, language, currency, email_verification_token
-    ]);
+    try {
+      await client.query('BEGIN');
+      
+      // Insert user
+      const userQuery = `
+        INSERT INTO users (email, password_hash, full_name, phone, language, currency, email_verification_token)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING id, email, full_name, phone, language, currency, is_verified, created_at, updated_at
+      `;
+      
+      const userResult = await client.query(userQuery, [
+        email, password_hash, full_name, phone, language, currency, email_verification_token
+      ]);
 
-    // Create initial credits record
-    await this.db.query(
-      'INSERT INTO credits (user_id, balance) VALUES ($1, $2)',
-      [result.rows[0].id, 0]
-    );
+      const user = userResult.rows[0];
 
-    return result.rows[0];
+      // Create initial credits record (100 starting credits)
+      await client.query(
+        'INSERT INTO credits (user_id, balance, total_earned) VALUES ($1, $2, $2)',
+        [user.id, 100]
+      );
+
+      // Log the registration
+      await client.query(
+        'INSERT INTO credit_transactions (user_id, type, amount, description) VALUES ($1, $2, $3, $4)',
+        [user.id, 'earned', 100, 'Welcome bonus - initial credits']
+      );
+
+      await client.query('COMMIT');
+      return user;
+      
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   async findByEmail(email: string): Promise<UserData | null> {
@@ -183,12 +212,17 @@ export class User {
   }
 
   async deductCredits(userId: number, amount: number): Promise<{ success: boolean; newBalance: number }> {
-    return await this.db.transaction(async (client) => {
+    const client = await this.db.getClient();
+    
+    try {
+      await client.query('BEGIN');
+      
       // Check current balance
       const balanceResult = await client.query('SELECT balance FROM credits WHERE user_id = $1', [userId]);
       const currentBalance = balanceResult.rows[0]?.balance || 0;
 
       if (currentBalance < amount) {
+        await client.query('ROLLBACK');
         return { success: false, newBalance: currentBalance };
       }
 
@@ -198,8 +232,15 @@ export class User {
         [amount, userId]
       );
 
+      await client.query('COMMIT');
       return { success: true, newBalance: updateResult.rows[0].balance };
-    });
+      
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   // Set email verification token
@@ -317,8 +358,8 @@ export class User {
     }
   }
 
-  // Verify password for user
-  async verifyPassword(userId: number, password: string): Promise<boolean> {
+  // Verify password for authenticated user by userId
+  async verifyUserPassword(userId: number, password: string): Promise<boolean> {
     try {
       const result = await this.db.query(
         'SELECT password_hash FROM users WHERE id = $1',
@@ -359,43 +400,7 @@ export class User {
     }
   }
 
-  // Update profile information
-  async updateProfile(userId: number, updates: Partial<UserData>): Promise<UserData | null> {
-    try {
-      const allowedFields = ['full_name', 'phone', 'language', 'currency'];
-      const updateFields: string[] = [];
-      const values: any[] = [];
-      let paramIndex = 1;
 
-      for (const [field, value] of Object.entries(updates)) {
-        if (allowedFields.includes(field) && value !== undefined) {
-          updateFields.push(`${field} = $${paramIndex}`);
-          values.push(value);
-          paramIndex++;
-        }
-      }
-
-      if (updateFields.length === 0) {
-        return await this.findById(userId);
-      }
-
-      updateFields.push(`updated_at = CURRENT_TIMESTAMP`);
-      values.push(userId);
-
-      const query = `
-        UPDATE users 
-        SET ${updateFields.join(', ')}
-        WHERE id = $${paramIndex} AND deleted_at IS NULL
-        RETURNING id, email, full_name, phone, language, currency, credits, is_verified, created_at, updated_at
-      `;
-
-      const result = await this.db.query(query, values);
-      return result.rows[0] as UserData || null;
-    } catch (error) {
-      logger.error('Error updating profile', { userId, updates, error });
-      return null;
-    }
-  }
 
   // Check if user exists by email (for registration)
   async existsByEmail(email: string): Promise<boolean> {

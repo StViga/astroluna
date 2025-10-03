@@ -18,15 +18,19 @@ interface PaymentState {
   currentSubscription: Subscription | null;
   paymentMethods: PaymentMethod[];
   transactions: Transaction[];
+  paymentHistory: Transaction[];
   selectedCurrency: Currency;
   exchangeRates: Record<string, number>;
   paymentStatus: PaymentStatus;
+  paymentInProgress: boolean;
+  paymentError: string | null;
   isLoading: boolean;
   error: string | null;
 
   // Actions
   loadSubscriptionPlans: () => Promise<void>;
   selectCurrency: (currency: Currency) => void;
+  setSelectedCurrency: (currency: Currency) => void;
   updateExchangeRates: () => Promise<void>;
   createPayment: (planId: string, interval: 'monthly' | 'yearly') => Promise<string | null>;
   processPayment: (paymentId: string, paymentData: any) => Promise<boolean>;
@@ -35,7 +39,9 @@ interface PaymentState {
   addPaymentMethod: (paymentMethod: Omit<PaymentMethod, 'id'>) => Promise<void>;
   removePaymentMethod: (methodId: string) => Promise<void>;
   loadTransactions: () => Promise<void>;
+  loadPaymentHistory: () => Promise<void>;
   getConvertedPrice: (amount: number, fromCurrency: Currency) => number;
+  convertPrice: (amount: number, fromCurrency?: Currency) => number;
   formatPrice: (amount: number, currency: Currency) => string;
   
   // Utility actions
@@ -118,12 +124,57 @@ export const usePaymentStore = create<PaymentState>()(
     (set, get) => ({
       // Initial state
       subscriptionPlans: defaultPlans,
-      currentSubscription: null,
-      paymentMethods: [],
-      transactions: [],
+      currentSubscription: {
+        id: 'demo_sub_001',
+        planId: 'pro',
+        status: 'active',
+        currentPeriodStart: new Date().toISOString(),
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        cancelAtPeriodEnd: false,
+        interval: 'month',
+        price: 24.99,
+        currency: 'USD',
+        nextPaymentDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        startDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        billingPeriod: 'monthly',
+        nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        generationsUsed: 45,
+        maxGenerations: 200
+      },
+      paymentMethods: [{
+        id: 'demo_pm_001',
+        type: 'card',
+        last4: '4242',
+        brand: 'visa',
+        expiryMonth: 12,
+        expiryYear: 2025,
+        isDefault: true
+      }],
+      transactions: [{
+        id: 'demo_txn_001',
+        type: 'subscription',
+        status: 'completed',
+        amount: 24.99,
+        currency: 'USD',
+        description: 'Astro Pro - Monthly subscription',
+        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        completedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+      }],
+      paymentHistory: [{
+        id: 'demo_txn_001',
+        type: 'subscription',
+        status: 'completed',
+        amount: 24.99,
+        currency: 'USD',
+        description: 'Astro Pro - Monthly subscription',
+        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        completedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+      }],
       selectedCurrency: currencyService.getUserPreferredCurrency() as Currency,
       exchangeRates: { USD: 1, EUR: 1.08, UAH: 0.027 },
       paymentStatus: 'idle',
+      paymentInProgress: false,
+      paymentError: null,
       isLoading: false,
       error: null,
 
@@ -249,6 +300,7 @@ export const usePaymentStore = create<PaymentState>()(
           
           if (status.status === 'success') {
             // Create mock subscription
+            const plan = get().subscriptionPlans.find(p => p.id === paymentData.planId);
             const newSubscription: Subscription = {
               id: `sub_${Date.now()}`,
               planId: paymentData.planId,
@@ -259,7 +311,13 @@ export const usePaymentStore = create<PaymentState>()(
               interval: paymentData.interval === 'yearly' ? 'year' : 'month',
               price: status.amount / 100,
               currency: status.currency,
-              nextPaymentDate: new Date(Date.now() + (paymentData.interval === 'yearly' ? 365 : 30) * 24 * 60 * 60 * 1000).toISOString()
+              nextPaymentDate: new Date(Date.now() + (paymentData.interval === 'yearly' ? 365 : 30) * 24 * 60 * 60 * 1000).toISOString(),
+              // Additional required fields
+              startDate: new Date().toISOString(),
+              billingPeriod: paymentData.interval,
+              nextBillingDate: new Date(Date.now() + (paymentData.interval === 'yearly' ? 365 : 30) * 24 * 60 * 60 * 1000).toISOString(),
+              generationsUsed: 0,
+              maxGenerations: plan?.maxGenerations || 0
             };
 
             // Create transaction record
@@ -271,7 +329,7 @@ export const usePaymentStore = create<PaymentState>()(
               currency: status.currency,
               description: `Subscription payment - ${paymentData.planId}`,
               createdAt: status.createdAt,
-              completedAt: status.completedAt
+              completedAt: status.completedAt || new Date().toISOString()
             };
 
             set({ 
@@ -414,6 +472,27 @@ export const usePaymentStore = create<PaymentState>()(
       // Format price
       formatPrice: (amount, currency) => {
         return currencyService.formatCurrency(amount, currency);
+      },
+
+      // Additional methods for compatibility
+      setSelectedCurrency: (currency) => {
+        set({ selectedCurrency: currency });
+        currencyService.setUserPreferredCurrency(currency);
+        get().updateExchangeRates();
+      },
+
+      convertPrice: (amount, fromCurrency) => {
+        return get().getConvertedPrice(amount, fromCurrency || get().selectedCurrency);
+      },
+
+      loadPaymentHistory: async () => {
+        set({ isLoading: true });
+        try {
+          const history = get().transactions; // Use same data as transactions
+          set({ paymentHistory: history, isLoading: false });
+        } catch (error: any) {
+          set({ isLoading: false, error: error.message });
+        }
       },
 
       // Utility actions

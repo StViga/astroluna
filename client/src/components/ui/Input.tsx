@@ -4,8 +4,8 @@ import { twMerge } from 'tailwind-merge';
 import { InputProps } from '@/types/common';
 
 // Utility function to merge classes
-const cn = (...classes: (string | undefined)[]) => {
-  return twMerge(clsx(classes));
+const cn = (...classes: (string | undefined | false | null)[]) => {
+  return twMerge(clsx(classes.filter(Boolean)));
 };
 
 const Input = forwardRef<HTMLInputElement, InputProps>(

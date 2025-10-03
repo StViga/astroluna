@@ -155,10 +155,10 @@ const LoginPage: React.FC = () => {
         </h3>
         <div className="text-sm text-gray-700 space-y-2 mb-4">
           <div className="bg-white rounded-lg p-3">
-            <strong>Email:</strong> <code className="text-primary-600">demo@astroluna.ai</code>
+            <strong>Email:</strong> <code className="text-primary-600">demo@astroluna.com</code>
           </div>
           <div className="bg-white rounded-lg p-3">
-            <strong>Password:</strong> <code className="text-primary-600">Demo123456</code>
+            <strong>Password:</strong> <code className="text-primary-600">demo123</code>
           </div>
         </div>
         <Button
@@ -167,8 +167,8 @@ const LoginPage: React.FC = () => {
           className="w-full border-primary-300 text-primary-700 hover:bg-primary-50"
           onClick={() => {
             setFormData({
-              email: 'demo@astroluna.ai',
-              password: 'Demo123456',
+              email: 'demo@astroluna.com',
+              password: 'demo123',
               remember: false
             });
           }}

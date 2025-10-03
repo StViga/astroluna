@@ -86,7 +86,7 @@ const BillingPage: React.FC = () => {
   const formatPrice = (plan: any, billing: 'monthly' | 'yearly') => {
     if (plan.id === 'free') return 'Free';
     
-    const price = convertPrice(plan.price[billing], plan.currency, selectedCurrency);
+    const price = convertPrice(plan.price[billing], plan.currency);
     return `${selectedCurrency} ${price.toFixed(2)}`;
   };
 
@@ -138,10 +138,10 @@ const BillingPage: React.FC = () => {
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold text-yellow-400">
-                {formatPrice(
-                  subscriptionPlans.find(p => p.id === currentSubscription.planId),
-                  currentSubscription.billingPeriod
-                )}
+                {(() => {
+                  const plan = subscriptionPlans.find(p => p.id === currentSubscription.planId);
+                  return plan ? formatPrice(plan, currentSubscription.billingPeriod) : `${selectedCurrency} ${currentSubscription.price || 0}`;
+                })()}
               </div>
               <div className="text-sm text-gray-300">
                 per {currentSubscription.billingPeriod.replace('ly', '')}

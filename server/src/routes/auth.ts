@@ -6,7 +6,7 @@ import {
   passwordResetRateLimit,
   apiRateLimit 
 } from '../middleware/rateLimiting';
-import { authenticateToken } from '../middleware/auth';
+import { authenticate } from '../middleware/auth';
 
 const router = express.Router();
 const authController = new AuthController();
@@ -101,7 +101,7 @@ router.post('/resend-verification', passwordResetRateLimit, (req, res) =>
  * @desc    Get current user profile
  * @access  Private
  */
-router.get('/me', authenticateToken, (req, res) => 
+router.get('/me', authenticate, (req, res) => 
   authController.getProfile(req, res)
 );
 
@@ -110,7 +110,7 @@ router.get('/me', authenticateToken, (req, res) =>
  * @desc    Update current user profile
  * @access  Private
  */
-router.put('/me', authenticateToken, (req, res) => 
+router.put('/me', authenticate, (req, res) => 
   authController.updateProfile(req, res)
 );
 
@@ -120,7 +120,7 @@ router.put('/me', authenticateToken, (req, res) =>
  * @access  Private
  * @rateLimit Same as password reset for security
  */
-router.post('/change-password', authenticateToken, passwordResetRateLimit, (req, res) => 
+router.post('/change-password', authenticate, passwordResetRateLimit, (req, res) => 
   authController.changePassword(req, res)
 );
 
@@ -129,7 +129,7 @@ router.post('/change-password', authenticateToken, passwordResetRateLimit, (req,
  * @desc    Logout user and invalidate tokens
  * @access  Private
  */
-router.post('/logout', authenticateToken, (req, res) => 
+router.post('/logout', authenticate, (req, res) => 
   authController.logout(req, res)
 );
 
@@ -138,7 +138,7 @@ router.post('/logout', authenticateToken, (req, res) =>
  * @desc    Logout user from all devices
  * @access  Private
  */
-router.post('/logout-all', authenticateToken, (req, res) => 
+router.post('/logout-all', authenticate, (req, res) => 
   authController.logoutAll(req, res)
 );
 
@@ -148,7 +148,7 @@ router.post('/logout-all', authenticateToken, (req, res) =>
  * @access  Private
  * @rateLimit Limited to prevent accidental deletion
  */
-router.delete('/delete-account', authenticateToken, passwordResetRateLimit, (req, res) => 
+router.delete('/delete-account', authenticate, passwordResetRateLimit, (req, res) => 
   authController.deleteAccount(req, res)
 );
 
@@ -159,7 +159,7 @@ if (process.env.NODE_ENV === 'development') {
    * @desc    Verify if token is valid (debug endpoint)
    * @access  Private
    */
-  router.get('/verify-token', authenticateToken, (req, res) => {
+  router.get('/verify-token', authenticate, (req, res) => {
     res.json({
       success: true,
       message: 'Token is valid',
@@ -172,7 +172,7 @@ if (process.env.NODE_ENV === 'development') {
    * @desc    Get all active sessions for current user (debug)
    * @access  Private
    */
-  router.get('/sessions', authenticateToken, (req, res) => 
+  router.get('/sessions', authenticate, (req, res) => 
     authController.getUserSessions(req, res)
   );
 }

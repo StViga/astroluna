@@ -7,15 +7,17 @@
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
     "server:dev": "cd server && npm run dev",
     "client:dev": "cd client && npm run dev",
-    "build": "cd client && npm run build && cd ../server && npm run build",
+    "build": "npm run client:build && npm run server:build",
     "server:build": "cd server && npm run build",
     "client:build": "cd client && npm run build",
     "start": "cd server && npm start",
+    "start:railway": "cd server && npm run start:railway",
     "test": "cd server && npm test && cd ../client && npm test",
     "db:setup": "cd server && npm run db:setup",
     "db:migrate": "cd server && npm run db:migrate",
     "db:seed": "cd server && npm run db:seed",
-    "install:all": "npm install && cd server && npm install && cd ../client && npm install"
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "postinstall": "npm run install:all"
   },
   "workspaces": [
     "server",

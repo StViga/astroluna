@@ -65,6 +65,7 @@ class MockAuthService {
     // Demo credentials
     const validCredentials = [
       { email: 'demo@astroluna.com', password: 'demo123' },
+      { email: 'demo@astroluna.ai', password: 'Demo123456' }, // Alternative demo account
       { email: 'test@example.com', password: 'test123' },
       { email: 'user@demo.com', password: 'password' }
     ];

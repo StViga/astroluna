@@ -3,7 +3,7 @@ import { ApiResponse, AuthTokens } from '@/types/auth';
 import { toast } from 'react-hot-toast';
 
 // Base API configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = (import.meta.env && import.meta.env.VITE_API_URL) || 'http://localhost:5000/api';
 const REQUEST_TIMEOUT = 30000; // 30 seconds
 
 // Create axios instance
@@ -69,7 +69,7 @@ api.interceptors.request.use(
     config.headers['X-Request-ID'] = generateRequestId();
     
     // Add client info
-    config.headers['X-Client-Version'] = import.meta.env.VITE_APP_VERSION || '1.0.0';
+    config.headers['X-Client-Version'] = (import.meta.env && import.meta.env.VITE_APP_VERSION) || '1.0.0';
     
     return config;
   },

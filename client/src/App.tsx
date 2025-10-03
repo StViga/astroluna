@@ -24,6 +24,11 @@ import BillingPage from '@/pages/dashboard/BillingPage';
 import LibraryPage from '@/pages/dashboard/LibraryPage';
 import GeneratePage from '@/pages/dashboard/GeneratePage';
 
+// Service pages
+import AstroScopePage from '@/pages/services/AstroScopePage';
+import TarotPathPage from '@/pages/services/TarotPathPage';
+import ZodiacTomePage from '@/pages/services/ZodiacTomePage';
+
 // Protected route wrapper
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, initialized } = useAuth();
@@ -66,6 +71,11 @@ const App: React.FC = () => {
         <Route path="pricing" element={<PricingPage />} />
         <Route path="about" element={<AboutPage />} />
         <Route path="contact" element={<ContactPage />} />
+        
+        {/* Service Pages */}
+        <Route path="services/astroscope" element={<AstroScopePage />} />
+        <Route path="services/tarotpath" element={<TarotPathPage />} />
+        <Route path="services/zodiactome" element={<ZodiacTomePage />} />
         
         {/* Auth Pages */}
         <Route path="login" element={

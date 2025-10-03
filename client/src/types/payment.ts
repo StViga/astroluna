@@ -50,6 +50,12 @@ export interface Subscription {
   currency: string;
   paymentMethodId?: string;
   nextPaymentDate?: string;
+  // Additional fields needed by BillingPage
+  startDate: string;
+  billingPeriod: 'monthly' | 'yearly';
+  nextBillingDate: string;
+  generationsUsed: number;
+  maxGenerations: number;
 }
 
 export interface PaymentIntent {
