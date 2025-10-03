@@ -104,10 +104,20 @@
 6. **Profile**: Update personal information and preferences
 
 ## 🚀 Deployment
-- **Platform**: Ready for modern hosting (Vercel, Netlify, Cloudflare)
-- **Status**: ✅ Frontend Active with Payment Integration, 🔧 Backend API Pending
-- **Tech Stack**: React + TypeScript + Node.js + PostgreSQL
-- **Last Updated**: October 3, 2025
+- **Platform**: Railway (Fullstack Node.js + PostgreSQL)
+- **Status**: 🚂 Ready for Railway deployment
+- **Tech Stack**: React + TypeScript + Node.js + Express + PostgreSQL
+- **Database**: PostgreSQL with automated migrations
+- **Last Updated**: October 3, 2024
+
+### 🚂 Railway Deployment
+1. Создайте новый проект на [Railway](https://railway.app)
+2. Подключите GitHub репозиторий: `https://github.com/StViga/astroluna`
+3. Добавьте PostgreSQL сервис к проекту
+4. Настройте environment variables (см. `.env.example`)
+5. Railway автоматически деплоит при push в main branch
+
+**Подробная инструкция**: [RAILWAY_DEPLOYMENT.md](RAILWAY_DEPLOYMENT.md)
 
 ## 💡 Architecture Highlights
 - Monorepo structure with separate client/server workspaces
