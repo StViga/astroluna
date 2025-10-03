@@ -1,0 +1,31 @@
+{
+  "name": "astroluna-platform",
+  "version": "2.0.0",
+  "description": "AI-powered astrology platform with React frontend and Node.js backend",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "server:dev": "cd server && npm run dev",
+    "client:dev": "cd client && npm run dev",
+    "build": "cd client && npm run build && cd ../server && npm run build",
+    "server:build": "cd server && npm run build",
+    "client:build": "cd client && npm run build",
+    "start": "cd server && npm start",
+    "test": "cd server && npm test && cd ../client && npm test",
+    "db:setup": "cd server && npm run db:setup",
+    "db:migrate": "cd server && npm run db:migrate",
+    "db:seed": "cd server && npm run db:seed",
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install"
+  },
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}

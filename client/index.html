@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="AstroLuna - AI-Powered Astrology Platform. Get personalized natal charts, compatibility analysis, and astrological insights powered by artificial intelligence." />
+    <meta name="keywords" content="astrology, AI, natal chart, horoscope, compatibility, predictions, artificial intelligence" />
+    <meta name="author" content="AstroLuna Team" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://astroluna.ai/" />
+    <meta property="og:title" content="AstroLuna - AI-Powered Astrology Platform" />
+    <meta property="og:description" content="Get personalized astrological insights powered by artificial intelligence. Natal charts, compatibility analysis, and more." />
+    <meta property="og:image" content="https://astroluna.ai/og-image.jpg" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://astroluna.ai/" />
+    <meta property="twitter:title" content="AstroLuna - AI-Powered Astrology Platform" />
+    <meta property="twitter:description" content="Get personalized astrological insights powered by artificial intelligence. Natal charts, compatibility analysis, and more." />
+    <meta property="twitter:image" content="https://astroluna.ai/og-image.jpg" />
+
+    <!-- Preload critical fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Theme color -->
+    <meta name="theme-color" content="#6366f1" />
+    
+    <!-- Apple touch icon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    
+    <title>AstroLuna - AI-Powered Astrology Platform</title>
+    
+    <!-- Prevent FOUC (Flash of Unstyled Content) -->
+    <style>
+      body {
+        visibility: hidden;
+        opacity: 0;
+      }
+      
+      /* Loading screen styles */
+      #initial-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease-out;
+      }
+      
+      .loader-content {
+        text-align: center;
+        color: white;
+      }
+      
+      .loader-logo {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        animation: pulse 2s infinite;
+      }
+      
+      .loader-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top: 3px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      /* Hide loader when app is ready */
+      body.app-ready #initial-loader {
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      body.app-ready {
+        visibility: visible;
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Initial loading screen -->
+    <div id="initial-loader">
+      <div class="loader-content">
+        <div class="loader-logo">🌟 AstroLuna</div>
+        <div class="loader-spinner"></div>
+        <p style="margin-top: 1rem; opacity: 0.8;">Loading your cosmic experience...</p>
+      </div>
+    </div>
+
+    <!-- React app root -->
+    <div id="root"></div>
+    
+    <!-- App initialization script -->
+    <script>
+      // Remove loader when React app mounts
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          document.body.classList.add('app-ready');
+          setTimeout(() => {
+            const loader = document.getElementById('initial-loader');
+            if (loader) {
+              loader.remove();
+            }
+          }, 500);
+        }, 1000); // Minimum loading time for better UX
+      });
+      
+      // Error handling for failed script loading
+      window.addEventListener('error', (e) => {
+        console.error('Script loading error:', e);
+        document.body.classList.add('app-ready');
+        const loader = document.getElementById('initial-loader');
+        if (loader) {
+          loader.innerHTML = `
+            <div class="loader-content">
+              <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+              <h2 style="margin-bottom: 0.5rem;">Loading Error</h2>
+              <p>Please refresh the page or check your connection.</p>
+              <button onclick="location.reload()" style="
+                background: white; 
+                color: #667eea; 
+                border: none; 
+                padding: 0.5rem 1rem; 
+                border-radius: 0.5rem; 
+                margin-top: 1rem;
+                cursor: pointer;
+                font-weight: 600;
+              ">Reload Page</button>
+            </div>
+          `;
+        }
+      });
+    </script>
+    
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
