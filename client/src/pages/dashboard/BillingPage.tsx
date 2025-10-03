@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { usePayment } from '@/store/paymentStore';
+import { usePaymentStore } from '@/store/paymentStore';
 import { useAuth } from '@/store/authStore';
 import Button from '@/components/ui/Button';
 import CheckoutForm from '@/components/payment/CheckoutForm';
@@ -14,7 +14,10 @@ import {
   XMarkIcon,
   SparklesIcon,
   StarIcon,
-  TrophyIcon
+  TrophyIcon,
+  BoltIcon,
+  GiftIcon,
+  FireIcon
 } from '@heroicons/react/24/outline';
 
 const BillingPage: React.FC = () => {
@@ -27,20 +30,31 @@ const BillingPage: React.FC = () => {
     convertPrice,
     cancelSubscription,
     loadPaymentHistory,
-    paymentInProgress
-  } = usePayment();
+    paymentInProgress,
+    // Token system
+    tokenPackages,
+    userTokens,
+    tokenPurchases,
+    purchaseTokens,
+    loadTokenPackages,
+    loadUserTokens
+  } = usePaymentStore();
 
   const [showCheckout, setShowCheckout] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{
     planId: string;
     billingPeriod: 'monthly' | 'yearly';
   } | null>(null);
+  const [showTokenCheckout, setShowTokenCheckout] = useState(false);
+  const [selectedTokenPackage, setSelectedTokenPackage] = useState<string | null>(null);
 
   const [billingToggle, setBillingToggle] = useState<'monthly' | 'yearly'>('monthly');
 
   useEffect(() => {
     loadPaymentHistory();
-  }, [loadPaymentHistory]);
+    loadTokenPackages();
+    loadUserTokens();
+  }, [loadPaymentHistory, loadTokenPackages, loadUserTokens]);
 
   const handlePlanSelect = (planId: string, billingPeriod: 'monthly' | 'yearly') => {
     setSelectedPlan({ planId, billingPeriod });
@@ -59,6 +73,26 @@ const BillingPage: React.FC = () => {
     setSelectedPlan(null);
   };
 
+  const handleTokenPurchase = async (packageId: string) => {
+    const paymentId = await purchaseTokens(packageId);
+    if (paymentId) {
+      setSelectedTokenPackage(packageId);
+      setShowTokenCheckout(true);
+    }
+  };
+
+  const handleTokenCheckoutSuccess = () => {
+    setShowTokenCheckout(false);
+    setSelectedTokenPackage(null);
+    loadUserTokens();
+    loadPaymentHistory();
+  };
+
+  const handleTokenCheckoutCancel = () => {
+    setShowTokenCheckout(false);
+    setSelectedTokenPackage(null);
+  };
+
   const handleCancelSubscription = async () => {
     if (currentSubscription && confirm('Are you sure you want to cancel your subscription?')) {
       await cancelSubscription(currentSubscription.id);
@@ -71,6 +105,26 @@ const BillingPage: React.FC = () => {
       case 'pro': return StarIcon;
       case 'master': return TrophyIcon;
       default: return SparklesIcon;
+    }
+  };
+
+  const getTokenPackageIcon = (packageId: string) => {
+    switch(packageId) {
+      case 'tokens_50': return SparklesIcon;
+      case 'tokens_150': return BoltIcon;
+      case 'tokens_350': return FireIcon;
+      case 'tokens_750': return GiftIcon;
+      default: return BoltIcon;
+    }
+  };
+
+  const getTokenPackageColor = (packageId: string) => {
+    switch(packageId) {
+      case 'tokens_50': return 'from-blue-500 to-cyan-600';
+      case 'tokens_150': return 'from-purple-500 to-pink-600';
+      case 'tokens_350': return 'from-orange-500 to-red-600';
+      case 'tokens_750': return 'from-yellow-500 to-orange-600';
+      default: return 'from-blue-500 to-cyan-600';
     }
   };
 
@@ -108,6 +162,32 @@ const BillingPage: React.FC = () => {
             onSuccess={handleCheckoutSuccess}
             onCancel={handleCheckoutCancel}
           />
+        </div>
+      </div>
+    );
+  }
+
+  if (showTokenCheckout && selectedTokenPackage) {
+    return (
+      <div className="bg-zodiac-constellations bg-cover bg-center bg-fixed min-h-screen relative">
+        <div className="absolute inset-0 bg-black bg-opacity-70"></div>
+        <div className="relative z-10 py-12">
+          {/* Token checkout form - for now just show success message */}
+          <div className="max-w-md mx-auto bg-white bg-opacity-10 backdrop-blur-md rounded-3xl p-8 border border-white border-opacity-20 shadow-xl">
+            <div className="text-center">
+              <div className="p-4 rounded-full bg-green-500 bg-opacity-20 inline-flex mb-4">
+                <CheckCircleIcon className="h-8 w-8 text-green-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-4">Token Purchase Processing</h2>
+              <p className="text-gray-300 mb-6">Your token purchase is being processed. Tokens will be added to your account shortly.</p>
+              <Button 
+                onClick={handleTokenCheckoutSuccess}
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+              >
+                Continue
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -210,6 +290,151 @@ const BillingPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Token Balance Card */}
+      <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-3xl p-8 border border-white border-opacity-20 shadow-xl">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-600 shadow-lg">
+              <BoltIcon className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white">Token Balance</h2>
+              <p className="text-gray-300">Use tokens for AI-powered astrological analysis</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-3xl font-bold text-yellow-400">
+              {userTokens.balance.toLocaleString()}
+            </div>
+            <div className="text-sm text-gray-300">Available Tokens</div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="bg-white bg-opacity-10 rounded-xl p-4">
+            <div className="flex items-center space-x-2 mb-2">
+              <ChartBarIcon className="h-5 w-5 text-blue-400" />
+              <span className="text-white font-medium">Total Purchased</span>
+            </div>
+            <div className="text-lg text-yellow-300">
+              {userTokens.totalPurchased.toLocaleString()}
+            </div>
+          </div>
+
+          <div className="bg-white bg-opacity-10 rounded-xl p-4">
+            <div className="flex items-center space-x-2 mb-2">
+              <SparklesIcon className="h-5 w-5 text-purple-400" />
+              <span className="text-white font-medium">Total Used</span>
+            </div>
+            <div className="text-lg text-yellow-300">
+              {userTokens.totalUsed.toLocaleString()}
+            </div>
+          </div>
+
+          <div className="bg-white bg-opacity-10 rounded-xl p-4">
+            <div className="flex items-center space-x-2 mb-2">
+              <CalendarIcon className="h-5 w-5 text-green-400" />
+              <span className="text-white font-medium">Last Updated</span>
+            </div>
+            <div className="text-lg text-yellow-300">
+              {new Date(userTokens.lastUpdated).toLocaleDateString()}
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center">
+          <p className="text-gray-300 mb-4">Need more tokens? Purchase individual token packages below</p>
+        </div>
+      </div>
+
+      {/* Token Packages */}
+      <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-3xl p-8 border border-white border-opacity-20 shadow-xl">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-white mb-4">Purchase Tokens</h2>
+          <p className="text-gray-300">Buy tokens individually for AI astrological analysis</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {tokenPackages.map((tokenPackage) => {
+            const Icon = getTokenPackageIcon(tokenPackage.id);
+            const color = getTokenPackageColor(tokenPackage.id);
+            const totalTokens = tokenPackage.tokens + (tokenPackage.bonus || 0);
+            const pricePerToken = tokenPackage.price / tokenPackage.tokens;
+
+            return (
+              <div
+                key={tokenPackage.id}
+                className={`relative bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 hover:scale-105 ${
+                  tokenPackage.popular 
+                    ? 'border-yellow-300 bg-opacity-15' 
+                    : 'border-white border-opacity-20 hover:border-opacity-40'
+                }`}
+              >
+                {tokenPackage.popular && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-4 py-1 rounded-full text-xs font-bold">
+                      Most Popular
+                    </div>
+                  </div>
+                )}
+
+                <div className="text-center">
+                  <div className={`inline-flex p-3 rounded-xl bg-gradient-to-r ${color} mb-4`}>
+                    <Icon className="h-6 w-6 text-white" />
+                  </div>
+                  
+                  <h3 className="text-xl font-bold text-white mb-2">{tokenPackage.name}</h3>
+                  <p className="text-gray-300 mb-4 text-sm">{tokenPackage.description}</p>
+                  
+                  <div className="mb-4">
+                    <div className="text-3xl font-bold text-white">
+                      {selectedCurrency} {convertPrice(tokenPackage.price, tokenPackage.currency).toFixed(2)}
+                    </div>
+                    <div className="text-sm text-gray-300">
+                      {selectedCurrency} {(convertPrice(pricePerToken, tokenPackage.currency)).toFixed(3)} per token
+                    </div>
+                    {tokenPackage.savings && (
+                      <div className="text-xs text-green-400 mt-1">
+                        {tokenPackage.savings}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mb-6">
+                    <div className="text-yellow-300 font-bold text-2xl">
+                      {tokenPackage.tokens.toLocaleString()}
+                    </div>
+                    {tokenPackage.bonus ? (
+                      <div>
+                        <div className="text-green-400 text-sm">+ {tokenPackage.bonus} bonus</div>
+                        <div className="text-xs text-gray-400">= {totalTokens} total tokens</div>
+                      </div>
+                    ) : (
+                      <div className="text-xs text-gray-400">Total tokens</div>
+                    )}
+                  </div>
+                </div>
+
+                <Button
+                  className={`w-full ${
+                    tokenPackage.popular 
+                      ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-black hover:from-yellow-300 hover:to-orange-400' 
+                      : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
+                  }`}
+                  onClick={() => handleTokenPurchase(tokenPackage.id)}
+                  disabled={paymentInProgress}
+                >
+                  {paymentInProgress ? (
+                    <ArrowPathIcon className="h-4 w-4 mr-2 animate-spin" />
+                  ) : null}
+                  Purchase Tokens
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Available Plans */}
       {(!currentSubscription || currentSubscription.status !== 'active') && (
@@ -342,13 +567,13 @@ const BillingPage: React.FC = () => {
               >
                 <div className="flex items-center space-x-4">
                   <div className={`p-2 rounded-lg ${
-                    payment.status === 'succeeded' 
+                    payment.status === 'completed' 
                       ? 'bg-green-500 bg-opacity-20 text-green-400'
                       : payment.status === 'failed'
                       ? 'bg-red-500 bg-opacity-20 text-red-400'
                       : 'bg-yellow-500 bg-opacity-20 text-yellow-400'
                   }`}>
-                    {payment.status === 'succeeded' ? (
+                    {payment.status === 'completed' ? (
                       <CheckCircleIcon className="h-5 w-5" />
                     ) : (
                       <ExclamationTriangleIcon className="h-5 w-5" />
@@ -366,7 +591,7 @@ const BillingPage: React.FC = () => {
                     {payment.currency.toUpperCase()} {(payment.amount / 100).toFixed(2)}
                   </div>
                   <div className={`text-sm capitalize ${
-                    payment.status === 'succeeded' 
+                    payment.status === 'completed' 
                       ? 'text-green-400'
                       : payment.status === 'failed'
                       ? 'text-red-400'

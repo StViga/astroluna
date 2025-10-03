@@ -6,7 +6,10 @@ import {
   Transaction, 
   PaymentMethod,
   Currency,
-  PaymentStatus 
+  PaymentStatus,
+  TokenPackage,
+  TokenPurchase,
+  UserTokens
 } from '@/types/payment';
 import SPCPaymentService from '@/services/payment';
 import NBUCurrencyService from '@/services/currency';
@@ -26,6 +29,11 @@ interface PaymentState {
   paymentError: string | null;
   isLoading: boolean;
   error: string | null;
+  
+  // Token system
+  tokenPackages: TokenPackage[];
+  userTokens: UserTokens;
+  tokenPurchases: TokenPurchase[];
 
   // Actions
   loadSubscriptionPlans: () => Promise<void>;
@@ -44,6 +52,14 @@ interface PaymentState {
   convertPrice: (amount: number, fromCurrency?: Currency) => number;
   formatPrice: (amount: number, currency: Currency) => string;
   
+  // Token actions
+  loadTokenPackages: () => Promise<void>;
+  purchaseTokens: (packageId: string) => Promise<string | null>;
+  processTokenPurchase: (purchaseId: string) => Promise<boolean>;
+  loadUserTokens: () => Promise<void>;
+  useTokens: (amount: number) => boolean;
+  loadTokenPurchases: () => Promise<void>;
+  
   // Utility actions
   clearError: () => void;
   setLoading: (loading: boolean) => void;
@@ -51,6 +67,49 @@ interface PaymentState {
 
 const paymentService = new SPCPaymentService();
 const currencyService = new NBUCurrencyService();
+
+// Default token packages
+const defaultTokenPackages: TokenPackage[] = [
+  {
+    id: 'tokens_50',
+    name: 'Starter Pack',
+    description: 'Perfect for trying out AI analysis',
+    tokens: 50,
+    price: 4.99,
+    currency: 'USD'
+  },
+  {
+    id: 'tokens_150',
+    name: 'Popular Pack',
+    description: 'Great value for regular users',
+    tokens: 150,
+    price: 12.99,
+    currency: 'USD',
+    bonus: 25,
+    popular: true,
+    savings: 'Save 17%'
+  },
+  {
+    id: 'tokens_350',
+    name: 'Power Pack',
+    description: 'Best for heavy users',
+    tokens: 350,
+    price: 24.99,
+    currency: 'USD',
+    bonus: 75,
+    savings: 'Save 30%'
+  },
+  {
+    id: 'tokens_750',
+    name: 'Pro Pack',
+    description: 'Maximum value for professionals',
+    tokens: 750,
+    price: 49.99,
+    currency: 'USD',
+    bonus: 200,
+    savings: 'Save 35%'
+  }
+];
 
 // Default subscription plans
 const defaultPlans: SubscriptionPlan[] = [
@@ -177,6 +236,27 @@ export const usePaymentStore = create<PaymentState>()(
       paymentError: null,
       isLoading: false,
       error: null,
+      
+      // Token system initial state
+      tokenPackages: defaultTokenPackages,
+      userTokens: {
+        balance: 125, // Demo tokens
+        totalPurchased: 150,
+        totalUsed: 25,
+        lastUpdated: new Date().toISOString()
+      },
+      tokenPurchases: [
+        {
+          id: 'token_purchase_001',
+          packageId: 'tokens_150',
+          tokens: 150,
+          amount: 12.99,
+          currency: 'USD',
+          status: 'completed',
+          createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+          completedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+        }
+      ],
 
       // Load subscription plans
       loadSubscriptionPlans: async () => {
@@ -268,12 +348,42 @@ export const usePaymentStore = create<PaymentState>()(
           const result = await paymentService.createPayment(paymentRequest);
           
           if (result.success && result.paymentUrl) {
-            set({ paymentStatus: 'succeeded', isLoading: false });
+            set({ paymentStatus: 'processing', isLoading: false });
             
-            // Open payment widget in new window or redirect
-            window.open(result.paymentUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+            // Setup payment window message handler
+            const handlePaymentMessage = (event: MessageEvent) => {
+              if (event.data.type === 'PAYMENT_SUCCESS') {
+                // Process the successful payment
+                get().processPayment(result.paymentId, {
+                  planId,
+                  interval,
+                  amount: event.data.amount,
+                  currency: event.data.currency
+                });
+                window.removeEventListener('message', handlePaymentMessage);
+              } else if (event.data.type === 'PAYMENT_CANCELLED') {
+                set({ paymentStatus: 'failed', paymentInProgress: false });
+                toast.error('Payment was cancelled');
+                window.removeEventListener('message', handlePaymentMessage);
+              }
+            };
             
-            toast.success('Payment created! Complete the payment in the new window.');
+            window.addEventListener('message', handlePaymentMessage);
+            
+            // Open payment widget in new window
+            const paymentWindow = window.open(
+              result.paymentUrl, 
+              'payment', 
+              'width=800,height=700,scrollbars=yes,resizable=yes,centerscreen=yes'
+            );
+            
+            if (!paymentWindow) {
+              toast.error('Please allow pop-ups to complete payment');
+              set({ paymentStatus: 'failed', isLoading: false });
+              return null;
+            }
+            
+            toast.success('Payment window opened. Complete the payment to continue.');
             return result.paymentId;
           } else {
             throw new Error(result.message || 'Payment creation failed');
@@ -495,6 +605,228 @@ export const usePaymentStore = create<PaymentState>()(
         }
       },
 
+      // Token management methods
+      loadTokenPackages: async () => {
+        set({ isLoading: true, error: null });
+        
+        try {
+          // In real app, this would fetch from API
+          const { selectedCurrency } = get();
+          
+          if (selectedCurrency !== 'USD') {
+            await get().updateExchangeRates();
+          }
+          
+          set({ 
+            tokenPackages: defaultTokenPackages,
+            isLoading: false 
+          });
+        } catch (error: any) {
+          set({ 
+            isLoading: false, 
+            error: error.message || 'Failed to load token packages' 
+          });
+        }
+      },
+
+      purchaseTokens: async (packageId) => {
+        set({ isLoading: true, error: null, paymentStatus: 'processing' });
+        
+        try {
+          const tokenPackage = get().tokenPackages.find(p => p.id === packageId);
+          if (!tokenPackage) {
+            throw new Error('Token package not found');
+          }
+
+          const { selectedCurrency } = get();
+          
+          // Convert price if needed
+          let finalAmount = tokenPackage.price;
+          if (selectedCurrency !== tokenPackage.currency) {
+            const converted = await currencyService.convertPrice(tokenPackage.price, tokenPackage.currency, selectedCurrency);
+            finalAmount = converted.convertedAmount;
+          }
+
+          const orderId = `token_order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          
+          const paymentRequest = {
+            amount: finalAmount,
+            currency: selectedCurrency,
+            orderId,
+            description: `${tokenPackage.name} - ${tokenPackage.tokens} tokens`,
+            customerEmail: 'user@example.com', // Should come from auth store
+            customerName: 'Demo User', // Should come from auth store
+            returnUrl: `${window.location.origin}/billing/token-success`,
+            callbackUrl: `${window.location.origin}/api/payment/token-callback`,
+            language: 'en' as const
+          };
+
+          const result = await paymentService.createPayment(paymentRequest);
+          
+          if (result.success && result.paymentUrl) {
+            set({ paymentStatus: 'processing', isLoading: false });
+            
+            // Setup payment window message handler
+            const handleTokenPaymentMessage = (event: MessageEvent) => {
+              if (event.data.type === 'PAYMENT_SUCCESS') {
+                // Process the successful token purchase
+                get().processTokenPurchase(result.paymentId);
+                window.removeEventListener('message', handleTokenPaymentMessage);
+              } else if (event.data.type === 'PAYMENT_CANCELLED') {
+                set({ paymentStatus: 'failed', paymentInProgress: false });
+                toast.error('Token purchase was cancelled');
+                window.removeEventListener('message', handleTokenPaymentMessage);
+              }
+            };
+            
+            window.addEventListener('message', handleTokenPaymentMessage);
+            
+            // Open payment widget in new window
+            const paymentWindow = window.open(
+              result.paymentUrl, 
+              'payment', 
+              'width=800,height=700,scrollbars=yes,resizable=yes,centerscreen=yes'
+            );
+            
+            if (!paymentWindow) {
+              toast.error('Please allow pop-ups to complete payment');
+              set({ paymentStatus: 'failed', isLoading: false });
+              return null;
+            }
+            
+            toast.success('Token purchase window opened. Complete the payment to continue.');
+            return result.paymentId;
+          } else {
+            throw new Error(result.message || 'Token purchase failed');
+          }
+          
+        } catch (error: any) {
+          set({ 
+            isLoading: false, 
+            error: error.message || 'Token purchase failed',
+            paymentStatus: 'failed'
+          });
+          toast.error(error.message || 'Token purchase failed');
+          return null;
+        }
+      },
+
+      processTokenPurchase: async (purchaseId) => {
+        set({ isLoading: true, error: null, paymentStatus: 'processing' });
+        
+        try {
+          // Check payment status
+          const status = await paymentService.getPaymentStatus(purchaseId);
+          
+          if (status.status === 'success') {
+            // Find the package from the description or store packageId in metadata
+            const packageId = 'tokens_150'; // In real app, this would come from payment metadata
+            const tokenPackage = get().tokenPackages.find(p => p.id === packageId);
+            
+            if (tokenPackage) {
+              // Create token purchase record
+              const tokenPurchase: TokenPurchase = {
+                id: `token_purchase_${Date.now()}`,
+                packageId: packageId,
+                tokens: tokenPackage.tokens + (tokenPackage.bonus || 0),
+                amount: status.amount / 100,
+                currency: status.currency,
+                status: 'completed',
+                createdAt: status.createdAt,
+                completedAt: status.completedAt || new Date().toISOString()
+              };
+
+              // Update user tokens
+              const currentTokens = get().userTokens;
+              const updatedTokens: UserTokens = {
+                balance: currentTokens.balance + tokenPurchase.tokens,
+                totalPurchased: currentTokens.totalPurchased + tokenPurchase.tokens,
+                totalUsed: currentTokens.totalUsed,
+                lastUpdated: new Date().toISOString()
+              };
+
+              // Create transaction record
+              const transaction: Transaction = {
+                id: status.transactionId || `txn_token_${Date.now()}`,
+                type: 'payment',
+                status: 'completed',
+                amount: status.amount / 100,
+                currency: status.currency,
+                description: `Token purchase - ${tokenPackage.name}`,
+                createdAt: status.createdAt,
+                completedAt: status.completedAt || new Date().toISOString()
+              };
+
+              set({ 
+                userTokens: updatedTokens,
+                tokenPurchases: [tokenPurchase, ...get().tokenPurchases],
+                transactions: [transaction, ...get().transactions],
+                paymentStatus: 'succeeded',
+                isLoading: false 
+              });
+
+              toast.success(`Token purchase successful! ${tokenPurchase.tokens} tokens added to your account.`);
+              return true;
+            } else {
+              throw new Error('Token package not found');
+            }
+          } else {
+            throw new Error('Payment not completed');
+          }
+          
+        } catch (error: any) {
+          set({ 
+            isLoading: false, 
+            error: error.message || 'Token purchase processing failed',
+            paymentStatus: 'failed'
+          });
+          toast.error(error.message || 'Token purchase processing failed');
+          return false;
+        }
+      },
+
+      loadUserTokens: async () => {
+        set({ isLoading: true });
+        
+        try {
+          // In real app, this would fetch from API
+          // For now, we use the existing state
+          set({ isLoading: false });
+        } catch (error: any) {
+          set({ isLoading: false, error: error.message });
+        }
+      },
+
+      useTokens: (amount) => {
+        const currentTokens = get().userTokens;
+        
+        if (currentTokens.balance >= amount) {
+          const updatedTokens: UserTokens = {
+            balance: currentTokens.balance - amount,
+            totalPurchased: currentTokens.totalPurchased,
+            totalUsed: currentTokens.totalUsed + amount,
+            lastUpdated: new Date().toISOString()
+          };
+          
+          set({ userTokens: updatedTokens });
+          return true;
+        }
+        
+        return false;
+      },
+
+      loadTokenPurchases: async () => {
+        set({ isLoading: true });
+        
+        try {
+          // In real app, this would fetch from API
+          // For now, we use the existing state
+          set({ isLoading: false });
+        } catch (error: any) {
+          set({ isLoading: false, error: error.message });
+        }
+      },
+
       // Utility actions
       clearError: () => set({ error: null }),
       setLoading: (loading) => set({ isLoading: loading })
@@ -506,7 +838,9 @@ export const usePaymentStore = create<PaymentState>()(
         selectedCurrency: state.selectedCurrency,
         currentSubscription: state.currentSubscription,
         paymentMethods: state.paymentMethods,
-        transactions: state.transactions
+        transactions: state.transactions,
+        userTokens: state.userTokens,
+        tokenPurchases: state.tokenPurchases
       })
     }
   )

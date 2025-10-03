@@ -24,6 +24,10 @@ import BillingPage from '@/pages/dashboard/BillingPage';
 import LibraryPage from '@/pages/dashboard/LibraryPage';
 import GeneratePage from '@/pages/dashboard/GeneratePage';
 
+// Payment pages
+import MockPaymentWidget from '@/components/payment/MockPaymentWidget';
+import PaymentSuccessPage from '@/pages/PaymentSuccessPage';
+
 // Service pages
 import AstroScopePage from '@/pages/services/AstroScopePage';
 import TarotPathPage from '@/pages/services/TarotPathPage';
@@ -99,6 +103,11 @@ const App: React.FC = () => {
           </PublicRoute>
         } />
         <Route path="verify-email" element={<VerifyEmailPage />} />
+        
+        {/* Payment Widget & Success Pages */}
+        <Route path="widget" element={<MockPaymentWidget />} />
+        <Route path="billing/success" element={<PaymentSuccessPage />} />
+        <Route path="billing/token-success" element={<PaymentSuccessPage />} />
         
         {/* Dashboard Pages */}
         <Route path="dashboard" element={

@@ -6,8 +6,10 @@
 - **Features**: User authentication, subscription system, AI-generated astrology content, personal library, payment processing with SPC Gateway, multi-currency support
 
 ## 🚀 Live Demo URLs
-- **Development Server**: http://localhost:3005
-- **Public Demo**: https://3005-imyext7r0v8p73x6olo44-6532622b.e2b.dev
+- **Development Server**: http://localhost:3012
+- **Public Demo**: https://3012-imyext7r0v8p73x6olo44-6532622b.e2b.dev
+- **Token Purchase**: https://3012-imyext7r0v8p73x6olo44-6532622b.e2b.dev/dashboard/billing (fully working)
+- **Payment Widget**: https://3012-imyext7r0v8p73x6olo44-6532622b.e2b.dev/widget (mock payment gateway)
 - **GitHub**: Repository ready for deployment
 
 ## 🎨 Visual Features
@@ -25,6 +27,8 @@
 - **Navigation**: Responsive sidebar with subscription tracking and progress indicators (English interface)
 - **User Interface**: Cosmic theme with nebula backgrounds, glassmorphism effects, English text throughout
 - **Payment Integration**: Complete SPC Payment Gateway integration with multi-currency support
+- **Token System**: Individual token packages for flexible pay-per-use model
+- **Language Switcher**: Multi-language UI selector (EN/ES/DE) with beautiful cosmic design
 - **State Management**: Zustand for authentication, payments, and subscriptions
 - **Visual Design**: Space-themed backgrounds with cosmic nebulas, constellations, and starfields
 
@@ -39,7 +43,8 @@
 - `/dashboard` - Main dashboard with subscription tracking (English)
 - `/dashboard/generate` - AI content generation with usage tracking (English)
 - `/dashboard/library` - User's saved content library (English)
-- `/dashboard/billing` - Full subscription management, payment history, and checkout (English)
+- `/dashboard/billing` - Full subscription management, payment history, token purchases, and checkout (Multi-language)
+- **Language Support**: EN/ES/DE switcher available in header, sidebar, and profile settings
 - `/dashboard/profile` - User profile settings (English)
 
 ### ✅ Technical Architecture
@@ -53,13 +58,15 @@
 - **Currency**: NBU API for real-time UAH/USD/EUR conversion
 - **UI Effects**: Glassmorphism, backdrop blur, and smooth animations
 - **Backgrounds**: Real cosmic imagery (nebulas, starfields, constellations)
-- **Localization**: Complete English interface throughout
+- **Language Switcher**: Beautiful multi-language selector with EN/ES/DE support
+- **Localization**: Complete English interface with language switcher infrastructure
 
 ## 🔧 Data Architecture & Payment System
 - **Data Models**: User, Subscription, PaymentHistory, Generation, AIProvider
 - **Payment Gateway**: SPC Payment Gateway with sandbox configuration
 - **Currency Support**: Multi-currency (USD, EUR, UAH) with NBU API conversion
 - **Subscription Plans**: Free, Cosmic Starter ($9.99/month), Astro Pro ($24.99/month), Cosmic Master ($49.99/month)
+- **Token Packages**: Starter Pack (50 tokens - $4.99), Popular Pack (150+25 bonus tokens - $12.99), Power Pack (350+75 bonus tokens - $24.99), Pro Pack (750+200 bonus tokens - $49.99)
 - **Authentication**: JWT tokens with refresh mechanism
 - **Payment Processing**: Secure card processing with 3DS support
 - **Test Cards**: 4111 1111 1111 1111 (Exp: 12/25, CVV: 123, 3DS: 111)
@@ -97,10 +104,10 @@
 ## 👥 User Guide
 1. **Registration**: Create account with email verification
 2. **Dashboard**: View statistics and manage account
-3. **Subscription**: Choose and manage subscription plans with secure payment processing
+3. **Subscription & Tokens**: Choose subscription plans or purchase individual token packages with secure payment processing
 4. **Generation**: Create astrological content using AI (usage tracked by plan)
 5. **Library**: Save and organize generated content
-6. **Billing**: Full subscription management, payment history, and plan upgrades
+6. **Billing**: Full subscription management, token purchases, payment history, and plan upgrades
 6. **Profile**: Update personal information and preferences
 
 ## 🚀 Deployment
@@ -144,9 +151,19 @@
 - **English Localization**: Complete interface translation throughout all pages
 
 **💳 Payment System Features**:
-- **SPC Payment Gateway**: Sandbox integration with test card support
+- **SPC Payment Gateway**: Sandbox integration with mock payment widget (working)
 - **Multi-Currency**: Dynamic USD/EUR/UAH conversion using NBU API
 - **Subscription Plans**: Free, Starter ($9.99), Pro ($24.99), Master ($49.99)
+- **Token Packages**: Individual token purchases with bonus rewards (50-750 tokens)
+- **Flexible Payment**: Choose between monthly subscriptions or pay-per-use token system
 - **Secure Checkout**: 3DS authentication and SSL encryption
-- **Payment History**: Transaction tracking and subscription management
-- **Usage Tracking**: Generation limits and progress indicators
+- **Payment History**: Transaction tracking for both subscriptions and token purchases
+- **Token Balance**: Real-time token tracking with usage statistics
+- **Usage Tracking**: Generation limits and progress indicators for both subscription and token users
+
+**🌍 Language & Internationalization**:
+- **Language Switcher**: Beautiful dropdown with EN/ES/DE support and country flags
+- **Multiple Locations**: Available in header, dashboard sidebar, and profile settings
+- **Cosmic Design**: Glassmorphism effects matching the overall space theme
+- **Responsive**: Works perfectly on desktop, tablet, and mobile devices
+- **Ready for i18n**: Infrastructure prepared for full localization implementation

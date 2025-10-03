@@ -93,10 +93,13 @@ class SPCPaymentService {
           language: request.language
         });
 
+        // Use local mock widget for sandbox
+        const baseUrl = window.location.origin;
+        
         return {
           success: true,
           paymentId,
-          paymentUrl: `${this.config.apiUrl}/widget?${widgetParams.toString()}`,
+          paymentUrl: `${baseUrl}/widget?${widgetParams.toString()}`,
           status: 'pending',
           message: 'Payment created successfully'
         };

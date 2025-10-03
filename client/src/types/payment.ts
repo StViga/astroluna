@@ -239,6 +239,37 @@ export interface CardValidation {
   };
 }
 
+// Token package types
+export interface TokenPackage {
+  id: string;
+  name: string;
+  description: string;
+  tokens: number;
+  price: number;
+  currency: 'USD' | 'EUR' | 'UAH';
+  popular?: boolean;
+  bonus?: number; // Extra tokens for promotions
+  savings?: string; // Display savings text
+}
+
+export interface TokenPurchase {
+  id: string;
+  packageId: string;
+  tokens: number;
+  amount: number;
+  currency: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  createdAt: string;
+  completedAt?: string;
+}
+
+export interface UserTokens {
+  balance: number;
+  totalPurchased: number;
+  totalUsed: number;
+  lastUpdated: string;
+}
+
 export type PaymentStatus = 'idle' | 'processing' | 'succeeded' | 'failed';
 export type SubscriptionInterval = 'month' | 'year';
 export type Currency = 'USD' | 'EUR' | 'UAH';

@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/store/authStore';
 import { usePayment } from '@/store/paymentStore';
+import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
 import { clsx } from 'clsx';
 
 interface SidebarProps {
@@ -158,8 +159,13 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
             </div>
           </li>
 
+          {/* Language Switcher */}
+          <li className="px-2 mt-4">
+            <LanguageSwitcher variant="sidebar" className="" />
+          </li>
+
           {/* User info */}
-          <li className="-mx-6 mt-auto">
+          <li className="-mx-6 mt-4">
             <div className="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-white border-t border-white border-opacity-20">
               <UserCircleIcon className="h-8 w-8 text-gray-300" />
               <span className="sr-only">Your profile</span>

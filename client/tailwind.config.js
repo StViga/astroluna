@@ -136,10 +136,10 @@ export default {
         'gradient-cosmic': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         'gradient-aurora': 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
         'gradient-starfield': 'radial-gradient(circle at 25% 25%, #667eea 0%, transparent 50%), radial-gradient(circle at 75% 75%, #764ba2 0%, transparent 50%)',
-        'cosmic-nebula-1': 'url("https://st4.depositphotos.com/4337187/30500/i/1600/depositphotos_305005796-stock-photo-outer-space-universe-nebula-stars.jpg")',
+        'cosmic-nebula-1': 'url("https://page.gensparksite.com/v1/base64_upload/032bd5ba53ff60afcb6f91dbe6430ad0")',
         'cosmic-nebula-2': 'url("https://static.vecteezy.com/system/resources/previews/012/466/834/large_2x/nebula-galaxy-astrology-deep-outer-space-cosmos-background-beautiful-abstract-illustration-art-dust-free-photo.jpg")',
-        'cosmic-stars': 'url("https://thumbs.dreamstime.com/b/universe-nebula-cluster-stars-starry-sky-outer-space-radiance-red-blue-purple-black-abstract-astrology-astronomy-background-175872873.jpg")',
-        'zodiac-constellations': 'url("https://thumbs.dreamstime.com/b/all-zodiac-signs-stars-constellations-over-mystic-universe-like-astrology-concept-name-star-nebula-clouds-background-271341402.jpg")',
+        'cosmic-stars': 'url("https://page.gensparksite.com/v1/base64_upload/fc76e0021d4cf5b478e7d7f84d7594ba")',
+        'zodiac-constellations': 'url("https://page.gensparksite.com/v1/base64_upload/48df6ae3b6845615d9b2f73a30dae5b2")',
         'mystical-space': 'url("https://static.vecteezy.com/system/resources/previews/007/938/205/non_2x/celestial-astrological-background-with-constellations-stars-sun-and-moon-mystical-astrology-celestial-space-with-golden-signs-illustration-vector.jpg")'
       },
       animation: {

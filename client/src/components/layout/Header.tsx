@@ -11,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/store/authStore';
 import Button from '@/components/ui/Button';
+import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
 import { clsx } from 'clsx';
 
 interface HeaderProps {
@@ -77,6 +78,11 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
                 </span>
               </div>
             )}
+
+            {/* Language Switcher */}
+            <div className="hidden lg:block">
+              <LanguageSwitcher variant="compact" />
+            </div>
 
             {/* Notifications */}
             <button
@@ -210,8 +216,11 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
                 ))}
               </div>
 
-              {/* Auth buttons */}
+              {/* Auth buttons and Language Switcher */}
               <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
+                {/* Language Switcher for public pages */}
+                <LanguageSwitcher variant="compact" />
+                
                 {isAuthenticated ? (
                   <>
                     <Link to="/dashboard">
@@ -277,6 +286,11 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
             </div>
             
             <div className="border-t border-gray-200 pb-3 pt-4">
+              {/* Language Switcher for mobile */}
+              <div className="px-4 pb-3">
+                <LanguageSwitcher variant="sidebar" className="w-full" />
+              </div>
+              
               <div className="space-y-1 px-4">
                 {isAuthenticated ? (
                   <>
