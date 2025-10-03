@@ -1,31 +1,16 @@
-# Multi-stage build for production optimization
-FROM node:18-alpine AS base
+# Multi-stage build for AstroLuna
+FROM node:18-alpine AS builder
 
-# Install dependencies only when needed
-FROM base AS deps
+# Set working directory
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-COPY server/package*.json ./server/
 COPY client/package*.json ./client/
+COPY server/package*.json ./server/
 
 # Install dependencies
-RUN npm ci --only=production && npm cache clean --force
-RUN cd server && npm ci --only=production && npm cache clean --force
-RUN cd client && npm ci --only=production && npm cache clean --force
-
-# Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-
-# Copy package files and install all dependencies (including devDependencies)
-COPY package*.json ./
-COPY server/package*.json ./server/
-COPY client/package*.json ./client/
-RUN npm ci
-RUN cd server && npm ci
-RUN cd client && npm ci
+RUN npm install
 
 # Copy source code
 COPY . .
@@ -33,31 +18,40 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Production image, copy all the files and run the server
-FROM base AS runner
+# Production stage
+FROM node:18-alpine AS production
+
+# Set working directory
 WORKDIR /app
 
 # Create non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 astroluna
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
+
+# Copy package files for production dependencies
+COPY package*.json ./
+COPY server/package*.json ./server/
+
+# Install only production dependencies
+RUN npm ci --only=production --workspace=server
 
 # Copy built application
-COPY --from=builder --chown=astroluna:nodejs /app/server/dist ./server/dist
-COPY --from=builder --chown=astroluna:nodejs /app/client/dist ./client/dist
-COPY --from=deps --chown=astroluna:nodejs /app/server/node_modules ./server/node_modules
-COPY --from=builder --chown=astroluna:nodejs /app/server/package*.json ./server/
+COPY --from=builder /app/server/dist ./server/dist
+COPY --from=builder /app/client/dist ./client/dist
+COPY --from=builder /app/server/package.json ./server/
 
-# Copy production package.json files
-COPY --chown=astroluna:nodejs package*.json ./
+# Copy static files
+COPY --from=builder --chown=nextjs:nodejs /app/client/dist ./public
 
-USER astroluna
+# Switch to non-root user
+USER nextjs
 
-# Expose the port the app runs on
-EXPOSE 5000
+# Expose port
+EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:5000/health || exit 1
+  CMD curl -f http://localhost:3000/api/health || exit 1
 
 # Start the application
 CMD ["npm", "start"]

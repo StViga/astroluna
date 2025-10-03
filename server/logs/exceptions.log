@@ -250,3 +250,87 @@
   ],
   timestamp: '2025-10-03 03:02:59'
 }
+{
+  error: TypeError: nodemailer.createTransporter is not a function
+      at new EmailService (/home/user/webapp/server/src/services/EmailService.ts:35:35)
+      at <anonymous> (/home/user/webapp/server/src/services/EmailService.ts:434:29)
+      at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+      at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+      at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5),
+  level: 'error',
+  message: 'uncaughtException: nodemailer.createTransporter is not a function\n' +
+    'TypeError: nodemailer.createTransporter is not a function\n' +
+    '    at new EmailService (/home/user/webapp/server/src/services/EmailService.ts:35:35)\n' +
+    '    at <anonymous> (/home/user/webapp/server/src/services/EmailService.ts:434:29)\n' +
+    '    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)\n' +
+    '    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)\n' +
+    '    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)',
+  stack: 'TypeError: nodemailer.createTransporter is not a function\n' +
+    '    at new EmailService (/home/user/webapp/server/src/services/EmailService.ts:35:35)\n' +
+    '    at <anonymous> (/home/user/webapp/server/src/services/EmailService.ts:434:29)\n' +
+    '    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)\n' +
+    '    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)\n' +
+    '    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)',
+  exception: true,
+  date: 'Fri Oct 03 2025 04:46:20 GMT+0000 (Coordinated Universal Time)',
+  process: {
+    pid: 405743,
+    uid: 1000,
+    gid: 1000,
+    cwd: '/home/user/webapp/server',
+    execPath: '/usr/bin/node',
+    version: 'v20.19.5',
+    argv: [ '/usr/bin/node', '/home/user/webapp/server/src/index.ts' ],
+    memoryUsage: {
+      rss: 97452032,
+      heapTotal: 24756224,
+      heapUsed: 15258472,
+      external: 3983245,
+      arrayBuffers: 98710
+    }
+  },
+  os: { loadavg: [ 1.68, 1.05, 1.22 ], uptime: 864618.66 },
+  trace: [
+    {
+      column: 35,
+      file: '/home/user/webapp/server/src/services/EmailService.ts',
+      function: 'new EmailService',
+      line: 35,
+      method: null,
+      native: false
+    },
+    {
+      column: 29,
+      file: '/home/user/webapp/server/src/services/EmailService.ts',
+      function: '<anonymous>',
+      line: 434,
+      method: null,
+      native: false
+    },
+    {
+      column: 25,
+      file: 'node:internal/modules/esm/module_job',
+      function: 'ModuleJob.run',
+      line: 325,
+      method: 'run',
+      native: false
+    },
+    {
+      column: 24,
+      file: 'node:internal/modules/esm/loader',
+      function: 'async ModuleLoader.import',
+      line: 606,
+      method: 'import',
+      native: false
+    },
+    {
+      column: 5,
+      file: 'node:internal/modules/run_main',
+      function: 'async asyncRunEntryPointWithESMLoader',
+      line: 117,
+      method: null,
+      native: false
+    }
+  ],
+  timestamp: '2025-10-03 04:46:20'
+}

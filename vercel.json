@@ -1,0 +1,60 @@
+{
+  "version": 2,
+  "name": "astroluna",
+  "builds": [
+    {
+      "src": "client/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    },
+    {
+      "src": "server/src/app.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/server/src/app.js"
+    },
+    {
+      "src": "/widget",
+      "dest": "/client/dist/index.html"
+    },
+    {
+      "src": "/billing/(.*)",
+      "dest": "/client/dist/index.html"
+    },
+    {
+      "src": "/dashboard/(.*)",
+      "dest": "/client/dist/index.html"
+    },
+    {
+      "src": "/auth/(.*)",
+      "dest": "/client/dist/index.html"
+    },
+    {
+      "src": "/services/(.*)",
+      "dest": "/client/dist/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/client/dist/index.html"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "build": {
+    "env": {
+      "NODE_ENV": "production"
+    }
+  },
+  "functions": {
+    "server/src/app.js": {
+      "maxDuration": 30
+    }
+  }
+}
